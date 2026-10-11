@@ -40,20 +40,22 @@ Samvel Sardaryan.
 - Input System package only. Actions live in `Assets/Settings/InputSystem_Actions.inputactions`
   and are the project-wide actions, read through `InputSystem.actions`
   (e.g. `InputSystem.actions.FindAction("Player/Jump")`). Player map: Move (WASD / arrows /
-  left stick), Sprint (Left Shift / left stick press), Jump (Space / gamepad South), Attack,
-  Interact, Crouch, Previous, Next, Look.
+  left stick), Sprint (Left Shift / left stick press), Jump (Space / gamepad South), Crouch (Left Ctrl /
+  C / gamepad East), Attack, Interact, Previous, Next, Look.
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, crates, a tall block, a low ceiling. The only scene in Build Settings |
+| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel. The only scene in Build Settings |
 | `Assets/Prefabs/Player.prefab` | The player |
 | `Assets/Scripts/Player/` | `PlayerMovement`, `StickmanAnimator` |
+| `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
+| `Assets/Editor/` | Editor-only scripts. `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -64,10 +66,17 @@ Samvel Sardaryan.
   is set in world units; falling uses extra gravity, releasing Jump early cuts the jump short,
   and coyote time plus a jump buffer make jumps forgiving. Ground detection is
   `Rigidbody2D.IsTouching` with a normal-angle `ContactFilter2D`, so no ground layer is needed.
-  `IsGrounded`, `FacingDirection`, `WalkSpeed` and `RunSpeed` are public.
+  Crouch (ground only) shrinks the capsule from the top to `crouchHeight` and slows the player;
+  it stays crouched under a low ceiling until there is headroom (an upward `Collider2D.Cast`).
+  Walking on the ground into a `PushableBox` (found with a short `Rigidbody2D.Cast` ahead) pushes
+  it: the player is capped at the box's `PushSpeed` and the box is given the player's velocity.
+  `IsGrounded`, `IsCrouching`, `IsPushing`, `FacingDirection` and the speeds are public.
+- `PushableBox` (on a crate, needs a dynamic Rigidbody2D with frozen rotation): only exposes
+  `PushSpeed` and `Push`. Ground friction stops it when let go; boxes on top ride along.
 - `StickmanAnimator` (on the `Visual` child) draws the stick figure with six LineRenderers (head,
   torso, front/back arm, front/back leg; back limbs are a lighter grey) and poses it procedurally
   every frame: a walk cycle that blends into a run cycle with speed, a jump/fall pose in the air,
-  and breathing when idle. Proportions and gaits are tunable in the Inspector; use its
+  a crouch and crouch-walk (legs solved with two-bone IK so the hips stay low), a push pose (body
+  shifted back, forearms on the box) and breathing when idle. Proportions and gaits are tunable in the Inspector; use its
   "Snap To Idle Pose" context menu after changing proportions. `PlayerMovement` mirrors `Visual`
   to face left.

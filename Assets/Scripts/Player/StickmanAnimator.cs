@@ -5,7 +5,8 @@ namespace NoRegRats
     /// <summary>
     /// Draws the player as a stick figure made of LineRenderers and animates it procedurally from
     /// the player's velocity: a walk cycle that blends into a run cycle as speed rises, a jump/fall
-    /// pose in the air, and a slight breathing motion when standing still.
+    /// pose in the air, a crouch and crouch-walk, a pushing pose with both hands on the box, and a
+    /// slight breathing motion when standing still.
     /// Local +x is "forward"; PlayerMovement mirrors this object to face left.
     /// Angles are measured from straight down, positive = rotated forward.
     /// </summary>
@@ -38,10 +39,10 @@ namespace NoRegRats
             };
         }
 
-        // Joint angles in radians, plus how far the hips sink while the legs are spread.
+        // Joint angles in radians, plus how far the hips sink and shift back from their standing spot.
         struct Pose
         {
-            public float lean, hipDrop;
+            public float lean, hipDrop, hipShift;
             public float frontThigh, frontKnee, backThigh, backKnee;
             public float frontArm, frontElbow, backArm, backElbow;
 
@@ -49,6 +50,7 @@ namespace NoRegRats
             {
                 lean = Mathf.Lerp(a.lean, b.lean, t),
                 hipDrop = Mathf.Lerp(a.hipDrop, b.hipDrop, t),
+                hipShift = Mathf.Lerp(a.hipShift, b.hipShift, t),
                 frontThigh = Mathf.Lerp(a.frontThigh, b.frontThigh, t),
                 frontKnee = Mathf.Lerp(a.frontKnee, b.frontKnee, t),
                 backThigh = Mathf.Lerp(a.backThigh, b.backThigh, t),
@@ -94,9 +96,34 @@ namespace NoRegRats
         [Tooltip("How quickly the figure blends into and out of its jump pose.")]
         [SerializeField] float airBlendSpeed = 10f;
 
+        [Header("Crouching")]
+        [Tooltip("Height of the hips above the feet while crouching. Keep the head inside the crouched collider.")]
+        [SerializeField] float crouchHipHeight = 0.42f;
+        [Tooltip("Forward lean of the upper body while crouching, in degrees.")]
+        [SerializeField] float crouchLean = 30f;
+        [Tooltip("Distance covered by one full crouch-walk cycle (two steps).")]
+        [SerializeField] float crouchStride = 0.9f;
+        [Tooltip("How high a foot lifts while crouch-walking.")]
+        [SerializeField] float crouchStepHeight = 0.08f;
+
+        [Header("Pushing")]
+        [Tooltip("Forward lean of the upper body while pushing, in degrees.")]
+        [SerializeField] float pushLean = 22f;
+        [Tooltip("How far the body shifts back while pushing so the hands rest on the box instead of inside it.")]
+        [SerializeField] float pushHipShift = 0.2f;
+        [Tooltip("Upper-arm angle while pushing, in degrees from hanging straight down.")]
+        [SerializeField] float pushUpperArm = 10f;
+        [Tooltip("Elbow bend while pushing, in degrees. Around 70 puts the forearms flat against the box.")]
+        [SerializeField] float pushElbowBend = 70f;
+
+        [Tooltip("How quickly the figure blends into and out of its crouch and push poses.")]
+        [SerializeField] float poseBlendSpeed = 12f;
+
         Rigidbody2D body;
         float cyclePhase;
         float airBlend;
+        float crouchBlend;
+        float pushBlend;
 
         void Awake()
         {
@@ -114,11 +141,17 @@ namespace NoRegRats
 
             float moving = Mathf.Clamp01(speed / movement.WalkSpeed);
             Gait gait = Gait.Lerp(walk, run, Mathf.InverseLerp(movement.WalkSpeed, movement.RunSpeed, speed));
-            if (grounded)
-                cyclePhase = Mathf.Repeat(cyclePhase + 2f * Mathf.PI * speed * dt / gait.strideLength, 2f * Mathf.PI);
             airBlend = Mathf.MoveTowards(airBlend, grounded ? 0f : 1f, airBlendSpeed * dt);
+            crouchBlend = Mathf.MoveTowards(crouchBlend, movement.IsCrouching ? 1f : 0f, poseBlendSpeed * dt);
+            pushBlend = Mathf.MoveTowards(pushBlend, movement.IsPushing ? 1f : 0f, poseBlendSpeed * dt);
 
-            Pose pose = Pose.Lerp(GroundPose(gait, moving), AirPose(velocity, speed), airBlend);
+            float stride = Mathf.Lerp(gait.strideLength, crouchStride, crouchBlend);
+            if (grounded)
+                cyclePhase = Mathf.Repeat(cyclePhase + 2f * Mathf.PI * speed * dt / stride, 2f * Mathf.PI);
+
+            Pose ground = Pose.Lerp(GroundPose(gait, moving), CrouchPose(Mathf.Clamp01(speed / movement.CrouchSpeed)), crouchBlend);
+            ground = Pose.Lerp(ground, PushPose(ground), pushBlend);
+            Pose pose = Pose.Lerp(ground, AirPose(velocity, speed), airBlend);
             float breath = Mathf.Sin(Time.time * 2.5f) * 0.012f * (1f - moving) * (1f - airBlend);
             Draw(pose, breath);
         }
@@ -159,6 +192,61 @@ namespace NoRegRats
             };
         }
 
+        Pose CrouchPose(float moving)
+        {
+            // Feet are placed relative to the low hips and the legs are solved to reach them, so the
+            // hips stay at one height while the feet step: each foot slides back while planted and
+            // lifts as it swings forward, like the walk cycle.
+            float sin = Mathf.Sin(cyclePhase);
+            float cos = Mathf.Cos(cyclePhase);
+            float reach = crouchStride * 0.25f * moving;
+            float lift = crouchStepHeight * moving;
+            var frontFoot = new Vector2(0.1f + reach * sin, -crouchHipHeight + lift * Mathf.Max(0f, cos));
+            var backFoot = new Vector2(-0.06f - reach * sin, -crouchHipHeight + lift * Mathf.Max(0f, -cos));
+            SolveLeg(frontFoot, out float frontThigh, out float frontKnee);
+            SolveLeg(backFoot, out float backThigh, out float backKnee);
+            float armSwing = 12f * moving * sin * Mathf.Deg2Rad;
+
+            return new Pose
+            {
+                lean = crouchLean * Mathf.Deg2Rad,
+                hipDrop = thighLength + shinLength - crouchHipHeight,
+                frontThigh = frontThigh,
+                frontKnee = frontKnee,
+                backThigh = backThigh,
+                backKnee = backKnee,
+                // Arms hang forward, loosely bent, swinging a little opposite the legs.
+                frontArm = 30f * Mathf.Deg2Rad - armSwing,
+                frontElbow = 40f * Mathf.Deg2Rad,
+                backArm = 15f * Mathf.Deg2Rad + armSwing,
+                backElbow = 45f * Mathf.Deg2Rad,
+            };
+        }
+
+        // Keeps the legs of the given pose and puts the hands flat on the box in front.
+        Pose PushPose(Pose pose)
+        {
+            pose.lean = pushLean * Mathf.Deg2Rad;
+            pose.hipShift = -pushHipShift;
+            pose.frontArm = pushUpperArm * Mathf.Deg2Rad;
+            pose.frontElbow = pushElbowBend * Mathf.Deg2Rad;
+            pose.backArm = (pushUpperArm - 10f) * Mathf.Deg2Rad;
+            pose.backElbow = (pushElbowBend + 5f) * Mathf.Deg2Rad;
+            return pose;
+        }
+
+        // Two-bone leg IK: thigh and knee angles that put the foot at `foot` (relative to the hip),
+        // with the knee bending forward. Out-of-reach targets are clamped to a straight leg.
+        void SolveLeg(Vector2 foot, out float thigh, out float knee)
+        {
+            float distance = Mathf.Clamp(foot.magnitude, Mathf.Abs(thighLength - shinLength) + 0.001f, thighLength + shinLength - 0.001f);
+            float toFoot = Mathf.Atan2(foot.x, -foot.y);
+            float atHip = Mathf.Acos((thighLength * thighLength + distance * distance - shinLength * shinLength) / (2f * thighLength * distance));
+            float atKnee = Mathf.Acos((thighLength * thighLength + shinLength * shinLength - distance * distance) / (2f * thighLength * shinLength));
+            thigh = toFoot + atHip;
+            knee = Mathf.PI - atKnee;
+        }
+
         Pose AirPose(Vector2 velocity, float speed)
         {
             // Tuck the legs and throw the arms up while rising, reach down for the landing while falling.
@@ -181,7 +269,7 @@ namespace NoRegRats
 
         void Draw(Pose pose, float breath)
         {
-            var hip = new Vector2(0f, hipHeight - pose.hipDrop);
+            var hip = new Vector2(pose.hipShift, hipHeight - pose.hipDrop);
             var up = new Vector2(Mathf.Sin(pose.lean), Mathf.Cos(pose.lean));
             Vector2 neck = hip + up * (torsoLength + breath);
             Vector2 shoulder = hip + up * (torsoLength * 0.85f + breath);
