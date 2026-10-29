@@ -4,19 +4,19 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// Side-scrolling player movement: walking, running while Sprint is held, crouching while Crouch
-    /// is held, pushing PushableBoxes by walking into them, and jumping with coyote time, jump
-    /// buffering and variable jump height (let go of Jump early for a short hop).
-    /// Reads the "Player/Move", "Player/Sprint", "Player/Jump" and "Player/Crouch" actions from the
-    /// project-wide input actions (Assets/Settings/InputSystem_Actions.inputactions).
+    /// Side-scrolling player movement: running at one speed, crouching while Crouch is held, pushing
+    /// PushableBoxes by walking into them, and jumping with coyote time, jump buffering and variable
+    /// jump height (let go of Jump early for a short hop).
+    /// Reads the "Player/Move", "Player/Jump" and "Player/Crouch" actions from the project-wide
+    /// input actions (Assets/Settings/InputSystem_Actions.inputactions). Facing and visuals are
+    /// handled by HeroAnimator.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
     public class PlayerMovement : MonoBehaviour
     {
-        [Header("Walking and Running")]
-        [SerializeField] float walkSpeed = 4f;
-        [Tooltip("Top speed while Sprint is held (Left Shift / left stick press).")]
-        [SerializeField] float runSpeed = 8f;
+        [Header("Running")]
+        [Tooltip("Top speed on the ground and in the air.")]
+        [SerializeField] float moveSpeed = 6f;
         [Tooltip("Speed gained per second while moving on the ground.")]
         [SerializeField] float groundAcceleration = 90f;
         [Tooltip("Speed lost per second on the ground when there is no input.")]
@@ -53,16 +53,12 @@ namespace NoRegRats
         [Tooltip("Surfaces sloped up to this many degrees count as ground.")]
         [SerializeField, Range(0f, 89f)] float maxGroundAngle = 50f;
 
-        [Header("Visuals")]
-        [Tooltip("Child holding the stick figure. It is mirrored to face the movement direction.")]
-        [SerializeField] Transform visual;
-
         public bool IsGrounded { get; private set; }
         public bool IsCrouching { get; private set; }
         public bool IsPushing { get; private set; }
         public int FacingDirection { get; private set; } = 1;
-        public float WalkSpeed => walkSpeed;
-        public float RunSpeed => runSpeed;
+        public Vector2 Velocity => body.linearVelocity;
+        public float MoveSpeed => moveSpeed;
         public float CrouchSpeed => crouchSpeed;
 
         Rigidbody2D body;
@@ -70,7 +66,6 @@ namespace NoRegRats
         Vector2 standingSize;
         Vector2 standingOffset;
         InputAction moveAction;
-        InputAction sprintAction;
         InputAction jumpAction;
         InputAction crouchAction;
         ContactFilter2D groundFilter;
@@ -79,8 +74,6 @@ namespace NoRegRats
         readonly RaycastHit2D[] hits = new RaycastHit2D[8];
 
         float moveInput;
-        bool sprintHeld;
-        bool runPace;
         bool crouchHeld;
         bool jumpHeld;
         float jumpBufferTimer;
@@ -105,7 +98,6 @@ namespace NoRegRats
                 return;
             }
             moveAction = actions.FindAction("Player/Move", throwIfNotFound: true);
-            sprintAction = actions.FindAction("Player/Sprint", throwIfNotFound: true);
             jumpAction = actions.FindAction("Player/Jump", throwIfNotFound: true);
             crouchAction = actions.FindAction("Player/Crouch", throwIfNotFound: true);
 
@@ -119,7 +111,6 @@ namespace NoRegRats
         void Update()
         {
             moveInput = moveAction.ReadValue<Vector2>().x;
-            sprintHeld = sprintAction.IsPressed();
             crouchHeld = crouchAction.IsPressed();
             jumpHeld = jumpAction.IsPressed();
             if (jumpAction.WasPressedThisFrame())
@@ -129,13 +120,6 @@ namespace NoRegRats
                 FacingDirection = 1;
             else if (moveInput < -0.01f)
                 FacingDirection = -1;
-
-            if (visual != null)
-            {
-                Vector3 scale = visual.localScale;
-                scale.x = Mathf.Abs(scale.x) * FacingDirection;
-                visual.localScale = scale;
-            }
         }
 
         void FixedUpdate()
@@ -155,10 +139,7 @@ namespace NoRegRats
             else if (IsCrouching && HasHeadroom())
                 SetCrouching(false);
 
-            // Walk or run is chosen on the ground; in the air the player keeps the pace they jumped with.
-            if (IsGrounded)
-                runPace = sprintHeld && !IsCrouching;
-            float maxSpeed = IsCrouching ? crouchSpeed : runPace ? runSpeed : walkSpeed;
+            float maxSpeed = IsCrouching ? crouchSpeed : moveSpeed;
             bool hasInput = Mathf.Abs(moveInput) > 0.01f;
 
             PushableBox box = IsGrounded && hasInput ? FindPushableBox() : null;
