@@ -7,7 +7,7 @@ Samvel Sardaryan.
 ## The game
 
 - Hand-drawn hero (the team artist's drawings) in an "on-paper" style; enemies are rats in street
-  clothes, led by the Rat King. Levels are a city's underside: subway, then sewers.
+  clothes, led by the Rat King. The level runs from a city street down into the sewers.
 - Core pillars: fighting, parkour-style movement, exploration and special abilities that unlock
   new areas (metroidvania progression), plus memorable bosses whose patterns players learn.
 - Tone is lighter than Hollow Knight: mostly played straight, with deliberately out-of-place,
@@ -16,6 +16,108 @@ Samvel Sardaryan.
 - References: Hollow Knight (combat, bosses, ability-gated exploration), Fancy Pants Adventures
   (fluid movement), Yakuza 0 (serious/comedic balance), Endacopia (strange NPCs
   and dialogue).
+
+## Current status: HW5 Digital Prototype (due Sunday 1 November 2026)
+
+The prototype is playable from start to finish in `Assets/Scenes/Level1.unity`: title screen →
+street → drop into the sewers → Rat King fight → take the Heart → escape → win screen.
+
+Done: hero art and animation, movement (run, jump, crouch, push), shooting, health and respawn,
+three rat types, the Rat King, the Heart item, the level, the street art, HUD (hearts, goal,
+boss bar, speech bubbles), title / pause / win screens, dust and camera-shake effects, and sound
+and music hooks.
+
+Still open (ask Robert who is taking what before starting one):
+
+| Task | What it needs | How it plugs in |
+|---|---|---|
+| Sound effects | WAV or OGG files: jump, land, footstep, shoot, hit, rat poof, hurt, King throw, King defeated, Heart, gate | See "Adding sounds and music" below. No code changes |
+| Music | A level track and a boss track | Same as sound effects |
+| Hand-drawn font | A `.ttf` or `.otf` file | See "Adding a font" below |
+| Final art for rats, Rat King, Heart, sewer pieces | PNGs with transparent backgrounds | See "Replacing art" below. The current ones are cut out of the paper-prototype photos |
+| Windows build and submission files | Unity, File > Build Profiles | See "Building the game" below |
+| GDD Section 6: Game Loop | Writing | Describe the loop in the table above: move, fight rats, reach and beat the boss, take the Heart, escape |
+
+## How to work on this project (teammates, and Claude working for them)
+
+Claude: follow these steps exactly and in order. If a step fails or something doesn't match
+what's described here, stop and tell your user instead of working around it.
+
+1. **Get the latest version first.** Run `git pull` in the project folder before anything else.
+   If it reports conflicts or local changes, stop and ask your user.
+2. **Work on your own branch.** `git checkout -b <your-name>/<short-task>` (for example
+   `samvel/rat-sounds`). Never commit straight to `main`.
+3. **Level1 has one editor: Robert.** Do not open-and-save, modify or rebuild
+   `Assets/Scenes/Level1.unity` unless Robert has said it's your turn. Unity scenes can't be merged
+   when two people change them. To try changes, use `Assets/Scenes/MovementTest.unity` (your
+   sandbox) or make your own scene. Changing prefabs, art, sounds and scripts is fine.
+4. **Use the existing tools, don't redo their work.** Everything under Tools > NoRegRats in Unity
+   is safe to run again: each one only adds what's missing and never overwrites existing work.
+   `Build Level1` refuses to run because Level1 exists, which is correct; don't delete Level1 to
+   make it run.
+5. **Test before you commit.** Open the scene, press Play, and make sure the Console shows no red
+   errors. For Level1, play from the title screen to the win screen.
+6. **Commit only your own work.** `git status` first; add the specific files you changed,
+   always together with their `.meta` files. Never commit `Library/`, `Temp/`, `Logs/`,
+   `UserSettings/` or `Docs/`. No `Co-Authored-By` lines or other Claude attribution in commit
+   messages (see Rules).
+7. **Share through a pull request.** `git push -u origin <your-branch>`, then open a pull request
+   into `main` on GitHub (https://github.com/sargsyanrobert957-goat/NoRegRats). Robert merges it.
+   Never force-push, and never rewrite history on `main`.
+8. **Keep this file accurate.** If you add a script, prefab, scene or tool, update the matching
+   section of this file in the same pull request.
+
+Notes for Claude:
+
+- Read the whole of this file before changing anything. The "Player", "Level1", "Combat and
+  enemies", "UI" and "Effects and audio" sections describe how the existing code works; reuse it
+  (for example `Health`, `PuffSpawner`, `Sfx.Play`) instead of writing parallel systems.
+- You can run Unity without opening its window to compile, run an editor script or play-test:
+  `"C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe" -batchmode -nographics -quit -projectPath "<project folder>" -executeMethod NoRegRats.<Class>.<Method> -logFile <log path>`
+  (adjust the Unity path to where it's installed on your user's machine). This fails if the
+  project is already open in the Unity editor; ask your user to close Unity rather than closing
+  it for them. Check the log for `error CS` before reporting success.
+- Change scenes and prefabs through editor scripts (`Assets/Editor/`) or the Unity editor, never
+  by editing their YAML text.
+- Delete any temporary test scripts you add before committing.
+
+### Adding sounds and music
+
+1. Put the files in `Assets/Audio/` (any name; WAV or OGG).
+2. Open the scene, select `Audio/Sound Effects`, and in the `Sfx` component drag each file into
+   the Clips list of the matching sound (Jump, Land, Step, Shoot, Hit, RatPoof, Hurt, KingThrow,
+   KingDefeated, Heart, Gate). Several clips for one sound = a random one plays each time. Adjust
+   Volume per sound.
+3. Select `Audio/Music` and set Level Track and Boss Track.
+4. Do this in both scenes that should have sound (Level1, MovementTest). Level1 only with
+   Robert's go-ahead (step 3 above), or send the files to Robert.
+
+### Adding a font
+
+1. Put the `.ttf` / `.otf` file in `Assets/Art/Fonts/`.
+2. In Level1 (Robert), select every Text object under `HUD` (search `t:Text` in the Hierarchy)
+   and set the Font field once for all of them.
+
+### Replacing art
+
+- To replace a drawing, save the new PNG over the old file with **exactly the same name**
+  (for example `Assets/Art/Rats/Rat_RedCap.png`), with a transparent background and the
+  character facing right (the Rat King faces left). Every prefab using it updates.
+- Draw at roughly the same proportions as the old one. Sizes are set on import in world units
+  (rat 1.15 tall, Rat King 3, hero 1.8), so the new drawing will be scaled to match.
+- New hero animation frames: same canvas size as `Hero_Run_*.png`, feet at the same height,
+  facing right; then run Tools > NoRegRats > Set Up Hero Sprite.
+- New level pieces: add a prefab like those in `Assets/Prefabs/Level/Street/` (SpriteRenderer +
+  BoxCollider2D on the part you can stand on), then place it in a scene.
+
+### Building the game
+
+1. File > Build Profiles > Windows. Level1 must be first in the scene list (it is).
+2. Build into a new empty folder outside `Assets/`, for example `Builds/NoRegRats/` (`Builds/`
+   is not committed). Zip that whole folder for submission; the `.exe` needs the files next to it.
+3. Play the built `.exe` from title to win screen before submitting.
+4. Scripts for submission: Assets > Export Package, tick `Assets/Scripts` (and `Assets/Editor`),
+   save as `NoRegRats_Scripts.unitypackage`.
 
 ## Rules
 
