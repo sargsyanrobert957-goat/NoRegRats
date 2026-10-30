@@ -53,6 +53,7 @@ Samvel Sardaryan.
 | `Assets/Scenes/Level1.unity` | The prototype level (first in Build Settings): subway → shaft → sewers → boss arena. See "Level1" below |
 | `Assets/Scenes/MovementTest.unity` | Sandbox: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, one test rat of each type ("Test Rat", "Test Red-cap", "Test Jacket"). Second in Build Settings |
 | `Assets/Prefabs/Level/` | Level pieces: `Block` (dark ink rectangle, scale it), `Crate` (pushable), `TrainCar`, `StoneBridge`, `BrickLedge`, `ACUnit`, `Pipe`, `ScaffoldBar` (art with colliders on the solid part), `Sign_Sewers`, `Sign_Subway` (no collider), `Gate` (tiled bars + `SlidingGate`) |
+| `Assets/Prefabs/Level/Street/` | The team's street art as prefabs: `Sidewalk` (slab; swap its sprite between Ground1–4), `Road`, `SidewalkChunk_Small` / `_Pipe` / `_Double` / `_Wide` (floating platforms), `FireHydrant`, `PowerBox` (solid props), `Dumpster` (pushable). Pivots sit on the walking line or base, so place them by where you stand |
 | `Assets/Prefabs/Player.prefab` | The player |
 | `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot), `Trash` (the Rat King's) |
 | `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2), `RatKing` (8 HP, bite 2, trash 1) |
@@ -63,14 +64,14 @@ Samvel Sardaryan.
 | `Assets/Scripts/Items/` | `HeartPickup` |
 | `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win, run time), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit`, `GoalTrigger`, `SpeechTrigger` |
 | `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar`, `HeartsDisplay`, `GoalText`, `SpeechBubble`, `TitleMenu`, `PauseMenu`, `WinScreen`, `GamePause` (freeze behind menus) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Street/`: the team artist's street pieces (Ground1–4 sidewalk slabs, Street road strip, Tile1/1_2/2/3 floating sidewalk chunks, FireHydrant, GarbageBin, PowerBox), sized from their mockup. `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Effects/` | `PuffSpawner` (pooled dust / paper-scrap puffs), `Sfx` (sound effects), `Music` (level and boss tracks) |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet), `PolishSetup` (Tools > NoRegRats > Set Up Effects And Audio: HeroEffects on the Player, "Effects" and "Audio" objects in both scenes if missing) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet), `PolishSetup` (Tools > NoRegRats > Set Up Effects And Audio: HeroEffects on the Player, "Effects" and "Audio" objects in both scenes if missing), `StreetDressing` (Tools > NoRegRats > Dress Level1 Street: street prefabs if missing, and Level1's first section dressed with them if not already) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -113,9 +114,14 @@ Samvel Sardaryan.
 - Built once by `Level1Builder`; from then on it's edited by hand in Unity (one person at a time).
   Objects are prefab instances grouped under `Level/Subway`, `Level/Shaft`, `Level/Sewers`,
   `Level/Arena`, so pieces and whole sections can be moved, added or swapped in the editor.
-- Coordinates: subway floor top y = 0, sewer floor top y = -20. Route: start x 2 → train cars
-  (Plain rat on top) → stone bridge, Red-cap → crate puzzle (wall top 4.2 is above the 3.5 jump;
-  push the crate against it, low stopper at x 31) → Plain rat → "SEWERS" shaft x 62–66 → Jacket
+- The first section (group `Level/Subway`) is dressed as a street by `StreetDressing`: sidewalk
+  slabs and the road strip over the floor `Block`, and the team's props as the platforms.
+- Coordinates: street (subway group) floor top y = 0, sewer floor top y = -20. Route: start x 2
+  → small floating chunk (x 6) → power box (x 12, top 2.78, Plain rat on top) → hydrant → wide
+  floating chunk (x 21, 2.9) → double chunk (x 27.5, 5.0), Red-cap below → crate puzzle (the big
+  power box at x 40–43.8 is 4.2 high, above the 3.5 jump; push the dumpster (1.85 high) against
+  it; the hydrant at x 31.3 stops it being pushed too far back) → hydrant, Plain rat → chunk with
+  pipe (x 54, 3.0) → "SEWERS" shaft x 62–66 → Jacket
   rat → crouch gap under pipes at x 84–90 (1.4 high) → AC-unit steps → Jacket rat on a brick ledge
   → arena x 112–134, y -20 to -10 → exit hole at the bottom of the arena's right wall (x 134–136,
   y -20 to -16) behind the exit grate, with the `LevelExit` trigger in it.
