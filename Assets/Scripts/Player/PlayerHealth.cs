@@ -1,12 +1,12 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace NoRegRats
 {
     /// <summary>
     /// The hero's reaction to their Health: knocked away from whatever hurt them, and on death the
-    /// controls stop and the level restarts after a short pause.
+    /// controls stop, the death is counted and the level fades out and restarts (every rat and the
+    /// Rat King come back). If the Heart was already taken, the hero restarts with the extra heart.
     /// </summary>
     [RequireComponent(typeof(Health), typeof(PlayerMovement))]
     public class PlayerHealth : MonoBehaviour
@@ -15,8 +15,10 @@ namespace NoRegRats
         [SerializeField] Vector2 knockback = new Vector2(7f, 6f);
         [Tooltip("Seconds the controls are taken away during the knockback.")]
         [SerializeField] float knockbackTime = 0.25f;
-        [Tooltip("Seconds between dying and the level restarting.")]
-        [SerializeField] float restartDelay = 1f;
+        [Tooltip("Seconds between dying and the screen starting to fade out.")]
+        [SerializeField] float restartDelay = 0.8f;
+        [Tooltip("Extra hearts the Heart item gives, kept after dying.")]
+        [SerializeField] int heartBonus = 1;
 
         Health health;
         PlayerMovement movement;
@@ -25,6 +27,12 @@ namespace NoRegRats
         {
             health = GetComponent<Health>();
             movement = GetComponent<PlayerMovement>();
+        }
+
+        void Start()
+        {
+            if (GameSession.HasHeart)
+                health.SetMax(health.Max + heartBonus, refill: true);
         }
 
         void OnEnable()
@@ -52,14 +60,14 @@ namespace NoRegRats
             movement.enabled = false;
             if (TryGetComponent(out PlayerShooter shooter))
                 shooter.enabled = false;
+            GameSession.RecordDeath();
             StartCoroutine(RestartLevel());
         }
 
-        // Reloads the scene, which puts every rat and the hero back where they started.
         IEnumerator RestartLevel()
         {
             yield return new WaitForSeconds(restartDelay);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            ScreenFader.ReloadScene();
         }
     }
 }

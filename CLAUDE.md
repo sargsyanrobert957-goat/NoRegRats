@@ -49,20 +49,22 @@ Samvel Sardaryan.
 
 | Path | Contents |
 |---|---|
-| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, a "Test Rat". The only scene in Build Settings |
+| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, one test rat of each type ("Test Rat", "Test Red-cap", "Test Jacket"). The only scene in Build Settings |
 | `Assets/Prefabs/Player.prefab` | The player |
 | `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot) |
-| `Assets/Prefabs/Enemies/` | `Rat_Plain` |
+| `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2) |
 | `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter` |
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
 | `Assets/Scripts/Enemies/` | `RatEnemy` |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, cut out of the paper-prototype sketch photos (placeholder). `Placeholder/`: `PaperBall.png` |
+| `Assets/Scripts/Level/` | `GameSession` (what survives a death) |
+| `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in) |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Placeholder/`: `PaperBall.png` |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and Rat_Plain prefabs if missing, the Player's combat components, the test rat), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -93,8 +95,12 @@ Samvel Sardaryan.
 - `PlayerShooter`: Attack (Space) fires a pooled `Projectile` (PaperBall: 14 u/s, 6 units range,
   1 damage) every 0.35 s from `muzzleOffset`, low enough to hit rats, and calls `HeroAnimator.Recoil`.
 - `PlayerHealth` reacts to the hero's `Health` (3 hearts, 1 s invulnerability): knockback through
-  `PlayerMovement.Knockback` (input ignored meanwhile), and on death the controls stop and the
-  scene reloads after 1 s. `DamageFlash` tints the hero red and blinks it while invulnerable.
+  `PlayerMovement.Knockback` (input ignored meanwhile), and on death the controls stop, the death
+  is counted in `GameSession` and `ScreenFader.ReloadScene` fades out, reloads the level and fades
+  in. Reloading is the respawn: every rat (and later the Rat King) comes back at full HP. Only
+  `GameSession` survives (death count, `HasHeart`); with the Heart, `PlayerHealth` adds
+  `heartBonus` to max hearts on start. `GameSession.StartNewRun()` clears it for a fresh run.
+  `DamageFlash` tints the hero red and blinks it while invulnerable.
 
 ## Combat and enemies
 

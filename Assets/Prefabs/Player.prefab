@@ -309,6 +309,7 @@ MonoBehaviour:
   knockback: {x: 7, y: 6}
   knockbackTime: 0.25
   restartDelay: 1
+  heartBonus: 1
 --- !u!114 &950129925228273478
 MonoBehaviour:
   m_ObjectHideFlags: 0

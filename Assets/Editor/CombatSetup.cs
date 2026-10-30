@@ -5,18 +5,33 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Sets up combat: sizes the rat and paper-ball sprites, creates the PaperBall and Rat_Plain
-    /// prefabs (only if they don't exist yet, so later tweaks are kept), gives the Player prefab its
-    /// Health, DamageFlash, PlayerHealth and PlayerShooter, and puts a test rat in MovementTest.
+    /// Sets up combat: sizes the rat and paper-ball sprites, creates the PaperBall and rat prefabs
+    /// (only if they don't exist yet, so later tweaks are kept), gives the Player prefab its Health,
+    /// DamageFlash, PlayerHealth and PlayerShooter, and puts one rat of each type in MovementTest.
     /// Safe to run again.
     /// </summary>
     public static class CombatSetup
     {
+        // One entry per rat type: the stats from the paper prototype's rat table.
+        struct RatType
+        {
+            public string Name, TestName;
+            public int Health, Bite;
+            public float Speed, TestX, TestRange;
+        }
+
+        static readonly RatType[] RatTypes =
+        {
+            new RatType { Name = "Rat_Plain", TestName = "Test Rat", Health = 2, Bite = 1, Speed = 1.6f, TestX = -4f, TestRange = 2.5f },
+            new RatType { Name = "Rat_RedCap", TestName = "Test Red-cap", Health = 3, Bite = 1, Speed = 1.9f, TestX = 6f, TestRange = 2.5f },
+            new RatType { Name = "Rat_Jacket", TestName = "Test Jacket", Health = 4, Bite = 2, Speed = 1.3f, TestX = 21.5f, TestRange = 1.5f },
+        };
+
         const string PlayerPrefabPath = "Assets/Prefabs/Player.prefab";
         const string PaperBallPrefabPath = "Assets/Prefabs/Combat/PaperBall.prefab";
-        const string RatPrefabPath = "Assets/Prefabs/Enemies/Rat_Plain.prefab";
+        const string RatPrefabFolder = "Assets/Prefabs/Enemies/";
         const string PaperBallSpritePath = "Assets/Art/Placeholder/PaperBall.png";
-        const string RatSpritePath = "Assets/Art/Rats/Rat_Plain.png";
+        const string RatSpriteFolder = "Assets/Art/Rats/";
         const string NoFrictionPath = "Assets/Physics/NoFriction.physicsMaterial2D";
         const string ScenePath = "Assets/Scenes/MovementTest.unity";
         const string SpriteLitMaterialGuid = "a97c105638bdf8b4a8650670310a4cd3";
@@ -27,18 +42,29 @@ namespace NoRegRats
         [MenuItem("Tools/NoRegRats/Set Up Combat")]
         public static void Run()
         {
-            Sprite ratSprite = ConfigureSprite(RatSpritePath, RatHeight, new Vector2(0.5f, 0f));
             Sprite ballSprite = ConfigureSprite(PaperBallSpritePath, PaperBallSize, new Vector2(0.5f, 0.5f));
-            if (ratSprite == null || ballSprite == null)
+            if (ballSprite == null)
             {
-                Debug.LogError("CombatSetup: the rat or paper-ball sprite is missing.");
+                Debug.LogError("CombatSetup: the paper-ball sprite is missing.");
                 return;
             }
-
             Projectile ball = AssetDatabase.LoadAssetAtPath<Projectile>(PaperBallPrefabPath) ?? CreatePaperBall(ballSprite);
-            GameObject rat = AssetDatabase.LoadAssetAtPath<GameObject>(RatPrefabPath) ?? CreateRat(ratSprite);
             SetUpPlayer(ball);
-            AddTestRat(rat);
+
+            var scene = EditorSceneManager.OpenScene(ScenePath);
+            foreach (RatType type in RatTypes)
+            {
+                Sprite sprite = ConfigureSprite(RatSpriteFolder + type.Name + ".png", RatHeight, new Vector2(0.5f, 0f));
+                if (sprite == null)
+                {
+                    Debug.LogError($"CombatSetup: {RatSpriteFolder}{type.Name}.png is missing.");
+                    continue;
+                }
+                string prefabPath = RatPrefabFolder + type.Name + ".prefab";
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) ?? CreateRat(type, sprite, prefabPath);
+                AddTestRat(prefab, type, scene);
+            }
+            EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
             Debug.Log("CombatSetup: done.");
         }
@@ -67,9 +93,9 @@ namespace NoRegRats
             return prefab.GetComponent<Projectile>();
         }
 
-        static GameObject CreateRat(Sprite sprite)
+        static GameObject CreateRat(RatType type, Sprite sprite, string prefabPath)
         {
-            var root = new GameObject("Rat_Plain");
+            var root = new GameObject(type.Name);
             var body = root.AddComponent<Rigidbody2D>();
             body.mass = 2f;
             body.gravityScale = 3f;
@@ -89,13 +115,15 @@ namespace NoRegRats
             renderer.sortingOrder = 5;
             ApplySpriteMaterial(renderer);
 
-            Set(root.AddComponent<Health>(), "maxHealth", 2);
-            Set(root.AddComponent<RatEnemy>(), "visual", visual.transform);
-            Set(root.AddComponent<ContactDamage>(), "damage", 1);
+            Set(root.AddComponent<Health>(), "maxHealth", type.Health);
+            var rat = root.AddComponent<RatEnemy>();
+            Set(rat, "visual", visual.transform);
+            Set(rat, "walkSpeed", type.Speed);
+            Set(root.AddComponent<ContactDamage>(), "damage", type.Bite);
             Set(root.AddComponent<DamageFlash>(), "target", renderer);
 
             EnsureFolder("Assets/Prefabs/Enemies");
-            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, RatPrefabPath);
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
             Object.DestroyImmediate(root);
             return prefab;
         }
@@ -136,18 +164,16 @@ namespace NoRegRats
             }
         }
 
-        static void AddTestRat(GameObject ratPrefab)
+        static void AddTestRat(GameObject ratPrefab, RatType type, UnityEngine.SceneManagement.Scene scene)
         {
-            var scene = EditorSceneManager.OpenScene(ScenePath);
-            if (GameObject.Find("Test Rat") != null)
+            if (GameObject.Find(type.TestName) != null)
                 return;
 
             var rat = (GameObject)PrefabUtility.InstantiatePrefab(ratPrefab, scene);
-            rat.name = "Test Rat";
-            rat.transform.position = new Vector3(-4f, 0.02f, 0f);
-            Set(rat.GetComponent<RatEnemy>(), "patrolRange", 2.5f);
+            rat.name = type.TestName;
+            rat.transform.position = new Vector3(type.TestX, 0.02f, 0f);
+            Set(rat.GetComponent<RatEnemy>(), "patrolRange", type.TestRange);
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
         }
 
         // Imports a sprite so it is `worldSize` units tall, with the given pivot.
