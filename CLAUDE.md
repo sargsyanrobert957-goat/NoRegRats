@@ -49,22 +49,24 @@ Samvel Sardaryan.
 
 | Path | Contents |
 |---|---|
-| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, one test rat of each type ("Test Rat", "Test Red-cap", "Test Jacket"). The only scene in Build Settings |
+| `Assets/Scenes/Level1.unity` | The prototype level (first in Build Settings): subway → shaft → sewers → boss arena. See "Level1" below |
+| `Assets/Scenes/MovementTest.unity` | Sandbox: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, one test rat of each type ("Test Rat", "Test Red-cap", "Test Jacket"). Second in Build Settings |
+| `Assets/Prefabs/Level/` | Level pieces: `Block` (dark ink rectangle, scale it), `Crate` (pushable), `TrainCar`, `StoneBridge`, `BrickLedge`, `ACUnit`, `Pipe`, `ScaffoldBar` (art with colliders on the solid part), `Sign_Sewers`, `Sign_Subway` (no collider) |
 | `Assets/Prefabs/Player.prefab` | The player |
 | `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot) |
 | `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2) |
 | `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter` |
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
 | `Assets/Scripts/Enemies/` | `RatEnemy` |
-| `Assets/Scripts/Level/` | `GameSession` (what survives a death) |
+| `Assets/Scripts/Level/` | `GameSession` (what survives a death), `ParallaxBackground` |
 | `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Placeholder/`: `PaperBall.png` |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Placeholder/`: `PaperBall.png`. `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -101,6 +103,24 @@ Samvel Sardaryan.
   `GameSession` survives (death count, `HasHeart`); with the Heart, `PlayerHealth` adds
   `heartBonus` to max hearts on start. `GameSession.StartNewRun()` clears it for a fresh run.
   `DamageFlash` tints the hero red and blinks it while invulnerable.
+
+## Level1
+
+- Built once by `Level1Builder`; from then on it's edited by hand in Unity (one person at a time).
+  Objects are prefab instances grouped under `Level/Subway`, `Level/Shaft`, `Level/Sewers`,
+  `Level/Arena`, so pieces and whole sections can be moved, added or swapped in the editor.
+- Coordinates: subway floor top y = 0, sewer floor top y = -20. Route: start x 2 → train cars
+  (Plain rat on top) → stone bridge, Red-cap → crate puzzle (wall top 4.2 is above the 3.5 jump;
+  push the crate against it, low stopper at x 31) → Plain rat → "SEWERS" shaft x 62–66 → Jacket
+  rat → crouch gap under pipes at x 84–90 (1.4 high) → AC-unit steps → Jacket rat on a brick ledge
+  → arena x 112–134, y -20 to -10. Empty markers "Arena Gate Spot", "Rat King Spot", "Exit Spot".
+- The hero can jump 3.5 up and about 4.5 across; keep new gaps and steps within that.
+- Camera (`CameraFollow2D`): looks ahead in the facing direction and down while falling fast,
+  stays inside `bounds` (Level1: x -6..136, y -24..14), and `LockTo(center)` / `Unlock()` hold it
+  on a spot (for the arena).
+- Background: one tiled `GraphPaper` sprite with `ParallaxBackground` (drifts at 0.6 of the
+  camera's movement, tint by depth: blue-grey subway, green-grey sewers). It must stay big
+  enough to cover the view everywhere (110 x 44 units now).
 
 ## Combat and enemies
 
