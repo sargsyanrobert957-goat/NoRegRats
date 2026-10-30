@@ -43,7 +43,8 @@ Samvel Sardaryan.
   (e.g. `InputSystem.actions.FindAction("Player/Jump")`). Player map: Move (A/D / arrows /
   left stick), Jump (W / Up arrow / gamepad South), Attack (Space / Enter / left mouse / gamepad
   West), Crouch (Left Ctrl / C / gamepad East), Interact, Previous, Next, Look. Sprint still exists
-  in the asset but nothing reads it (the hero has one move speed).
+  in the asset but nothing reads it (the hero has one move speed). UI map: the template's actions
+  plus Pause (Esc / gamepad Start); it stays on while menus switch the Player map off.
 
 ## Layout
 
@@ -60,15 +61,15 @@ Samvel Sardaryan.
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
 | `Assets/Scripts/Enemies/` | `RatEnemy`, `RatKing`, `TrashProjectile` |
 | `Assets/Scripts/Items/` | `HeartPickup` |
-| `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit` |
-| `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar` |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit |
+| `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win, run time), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit`, `GoalTrigger`, `SpeechTrigger` |
+| `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar`, `HeartsDisplay`, `GoalText`, `SpeechBubble`, `TitleMenu`, `PauseMenu`, `WinScreen`, `GamePause` (freeze behind menus) |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -152,5 +153,22 @@ Samvel Sardaryan.
   The sketch faces left, so `artFacesRight` is off.
 - `HeartPickup` (trigger): `PlayerHealth.GainHeart()` (+1 max heart, refilled),
   `GameSession.HasHeart = true`, raises the static `Collected` event.
-- The `HUD` canvas in Level1 (screen-space overlay, scales from 1920 x 1080) holds the boss bar;
-  the rest of the HUD goes there too.
+
+## UI
+
+- Level1's `HUD` canvas (screen-space overlay, scales from 1920 x 1080; built by `HudSetup`):
+  `Hearts` (top left, `HeartsDisplay`: one icon per max heart, "+1 heart!" when the max rises),
+  `Goal` (top centre, `GoalText`), `Boss Bar` (bottom centre, `BossHealthBar`), `Speech`
+  (`SpeechBubble`: one line at a time above a world object, follows it on screen), and the
+  `Title Menu`, `Pause Menu`, `Win Screen` panels (components on the HUD root). An `EventSystem`
+  with `InputSystemUIInputModule` (project-wide UI actions) drives the buttons.
+- Goal steps: "Get to the sewers" (start) → "Find the Rat King" (`Sewers Goal` trigger) →
+  "Defeat the Rat King" → "Take the Heart" → "Escape through the grate!" (set by `BossArena`).
+- Lines: the start's `Joke Sign Line` (`SpeechTrigger` on the SUBWAY sign) and the Rat King's
+  fight-start and defeat lines (`BossArena`). All are editable text fields in the Inspector.
+- `GamePause.Freeze()` / `Unfreeze()`: time scale 0/1 and the Player action map off/on. Used by
+  the title (shown once per launch, not after deaths or restarts), pause (Esc) and win screens.
+  Restart and Play Again call `GameSession.StartNewRun()` then `ScreenFader.ReloadScene()`.
+- Text uses Unity's built-in font until a font is put in `Assets/Art/Fonts/`; `HudSetup` picks
+  the first one there for UI it creates. Existing Text components keep their font, so after
+  adding one, set it on the HUD's Text components (or select them all and change it at once).
