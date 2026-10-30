@@ -51,7 +51,15 @@ namespace NoRegRats
         [Tooltip("How quickly the lean blends in and out, in degrees per second.")]
         [SerializeField] float leanSpeed = 60f;
 
+        [Header("Shooting")]
+        [Tooltip("How far the figure is nudged backward on each shot, in world units.")]
+        [SerializeField] float recoilDistance = 0.08f;
+        [Tooltip("How quickly the figure returns after a recoil. Higher is snappier.")]
+        [SerializeField] float recoilRecovery = 12f;
+
         SpriteRenderer spriteRenderer;
+        Vector3 basePosition;
+        float recoil;
         Vector2 scale = Vector2.one;
         float runPhase;
         float lean;
@@ -60,9 +68,13 @@ namespace NoRegRats
         void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            basePosition = transform.localPosition;
             if (movement == null)
                 movement = GetComponentInParent<PlayerMovement>();
         }
+
+        /// <summary>Nudges the figure backward, e.g. when firing.</summary>
+        public void Recoil() => recoil = recoilDistance;
 
         void LateUpdate()
         {
@@ -104,7 +116,10 @@ namespace NoRegRats
             scale = Vector2.Lerp(scale, target, 1f - Mathf.Exp(-scaleSpring * dt));
             lean = Mathf.MoveTowards(lean, movement.IsPushing ? pushLean : 0f, leanSpeed * dt);
 
+            recoil = Mathf.Lerp(recoil, 0f, 1f - Mathf.Exp(-recoilRecovery * dt));
+
             int facing = movement.FacingDirection;
+            transform.localPosition = basePosition + Vector3.left * (recoil * facing);
             transform.localScale = new Vector3(scale.x * facing, scale.y, 1f);
             transform.localRotation = Quaternion.Euler(0f, 0f, -lean * facing);
         }

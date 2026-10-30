@@ -129,6 +129,8 @@ MonoBehaviour:
   scaleSpring: 14
   pushLean: 6
   leanSpeed: 60
+  recoilDistance: 0.08
+  recoilRecovery: 12
 --- !u!1 &4010168851994285444
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,6 +143,10 @@ GameObject:
   - component: {fileID: 3399686970021672349}
   - component: {fileID: 6915684935666239732}
   - component: {fileID: 4572145336697817371}
+  - component: {fileID: 7872510935903773563}
+  - component: {fileID: 8032652461118875231}
+  - component: {fileID: 3329337841967838822}
+  - component: {fileID: 950129925228273478}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -256,3 +262,66 @@ MonoBehaviour:
   crouchHeight: 1.2
   pushReach: 0.05
   maxGroundAngle: 50
+--- !u!114 &7872510935903773563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010168851994285444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf98b52704da9bd43a83dc9130f1753c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.Health
+  maxHealth: 3
+  invulnerableTime: 1
+--- !u!114 &8032652461118875231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010168851994285444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79565907cb283b14d9d02e5f28207e41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.DamageFlash
+  target: {fileID: 7956010861900077025}
+  flashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
+  flashTime: 0.12
+  blinkWhileInvulnerable: 1
+  blinkRate: 12
+  blinkAlpha: 0.35
+--- !u!114 &3329337841967838822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010168851994285444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c14558b59a7f0542bed29486e1d1502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.PlayerHealth
+  knockback: {x: 7, y: 6}
+  knockbackTime: 0.25
+  restartDelay: 1
+--- !u!114 &950129925228273478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010168851994285444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c412fc1e845b3b240929030e859eb18c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.PlayerShooter
+  projectilePrefab: {fileID: 5293320385312046784, guid: 5731819a89db54c4e819efbeb7ac0bb4, type: 3}
+  cooldown: 0.35
+  muzzleOffset: {x: 0.45, y: -0.15}
+  heroAnimator: {fileID: 6558260859440955381}

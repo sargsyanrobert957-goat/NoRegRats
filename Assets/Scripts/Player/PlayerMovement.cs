@@ -80,6 +80,7 @@ namespace NoRegRats
         float coyoteTimer;
         bool isRising;
         bool canCutJump;
+        float knockbackTimer;
 
         float JumpSpeed => Mathf.Sqrt(2f * jumpHeight * gravityScale * -Physics2D.gravity.y);
 
@@ -132,6 +133,15 @@ namespace NoRegRats
             coyoteTimer = IsGrounded ? coyoteTime : coyoteTimer - dt;
             jumpBufferTimer -= dt;
 
+            // During a knockback the hero flies freely; input takes over again when it ends.
+            if (knockbackTimer > 0f)
+            {
+                knockbackTimer -= dt;
+                IsPushing = false;
+                body.gravityScale = gravityScale;
+                return;
+            }
+
             // Crouching starts only on the ground. Standing back up waits until there is room overhead,
             // so letting go of Crouch in a low tunnel keeps the player crouched until they are out.
             if (crouchHeld && IsGrounded)
@@ -181,6 +191,16 @@ namespace NoRegRats
             body.gravityScale = velocity.y < 0f ? gravityScale * fallGravityMultiplier : gravityScale;
             velocity.y = Mathf.Max(velocity.y, -maxFallSpeed);
             body.linearVelocity = velocity;
+        }
+
+        /// <summary>Throws the hero with the given velocity and ignores input for a moment.</summary>
+        public void Knockback(Vector2 velocity, float duration)
+        {
+            body.linearVelocity = velocity;
+            knockbackTimer = duration;
+            isRising = false;
+            canCutJump = false;
+            jumpBufferTimer = 0f;
         }
 
         // Shrinks the collider from the top, keeping its bottom on the ground.

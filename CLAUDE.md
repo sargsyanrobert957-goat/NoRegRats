@@ -49,16 +49,20 @@ Samvel Sardaryan.
 
 | Path | Contents |
 |---|---|
-| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel. The only scene in Build Settings |
+| `Assets/Scenes/MovementTest.unity` | Test level: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, a "Test Rat". The only scene in Build Settings |
 | `Assets/Prefabs/Player.prefab` | The player |
-| `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator` |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px) |
+| `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot) |
+| `Assets/Prefabs/Enemies/` | `Rat_Plain` |
+| `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter` |
+| `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
+| `Assets/Scripts/Enemies/` | `RatEnemy` |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, cut out of the paper-prototype sketch photos (placeholder). `Placeholder/`: `PaperBall.png` |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and Rat_Plain prefabs if missing, the Player's combat components, the test rat), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -84,4 +88,23 @@ Samvel Sardaryan.
   left by mirroring `Visual`'s scale. Sprites must have their pivot at the feet; run
   Tools > NoRegRats > Set Up Hero Sprite after replacing the hero frames.
 - Sprite scale: art in `Assets/Art/` imports at 870 pixels per unit, the hero's drawing scale
-  (1570 px tall = 1.8 units).
+  (1570 px tall = 1.8 units). Cut-outs from photos are smaller, so CombatSetup sizes them by
+  height instead (rat 1.15 units, paper ball 0.35).
+- `PlayerShooter`: Attack (Space) fires a pooled `Projectile` (PaperBall: 14 u/s, 6 units range,
+  1 damage) every 0.35 s from `muzzleOffset`, low enough to hit rats, and calls `HeroAnimator.Recoil`.
+- `PlayerHealth` reacts to the hero's `Health` (3 hearts, 1 s invulnerability): knockback through
+  `PlayerMovement.Knockback` (input ignored meanwhile), and on death the controls stop and the
+  scene reloads after 1 s. `DamageFlash` tints the hero red and blinks it while invulnerable.
+
+## Combat and enemies
+
+- `Health` is shared by everything that can be hurt: `TakeDamage(amount, sourcePosition)`,
+  `Heal`, `SetMax`, `Restore`, and `Damaged` / `Died` / `Changed` events that other components
+  react to. Enemies use 0 invulnerability.
+- `Projectile` needs a trigger collider and a Dynamic Rigidbody2D with gravity 0. It ignores its
+  owner and other triggers, damages the first `Health` it touches and despawns on any solid hit.
+- `RatEnemy` patrols at `walkSpeed`, turning at walls, ledges and `patrolRange`; hit = knockback
+  and a short stun; death = shrink-and-fade poof, then the object is deactivated. Rats ignore
+  collisions with the hero (`Physics2D.IgnoreCollision`); `ContactDamage` bites by distance check.
+  Its single frame waddles (bob and tilt) on the `Visual` child, which is mirrored to face the
+  walking direction. Rat types are the same setup with different Health / ContactDamage / speed.
