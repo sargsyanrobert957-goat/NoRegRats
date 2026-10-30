@@ -29,6 +29,8 @@ namespace NoRegRats
                 return;
             playerHealth.GainHeart();
             GameSession.HasHeart = true;
+            Sfx.Play(Sfx.Sound.Heart);
+            PuffSpawner.Burst(transform.position, 10, 1f, 3f, new Color(1f, 0.82f, 0.35f, 0.95f));
             Collected?.Invoke();
             Destroy(gameObject);
         }

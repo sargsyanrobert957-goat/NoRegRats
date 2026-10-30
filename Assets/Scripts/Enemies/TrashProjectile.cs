@@ -54,6 +54,7 @@ namespace NoRegRats
             if (other.isTrigger || hit == null || !hit.TryGetComponent(out PlayerMovement _) || !hit.TryGetComponent(out Health health))
                 return;
             health.TakeDamage(damage, body.position);
+            PuffSpawner.Burst(body.position, 5, 0.7f, 2.5f, new Color(0.55f, 0.57f, 0.6f, 0.9f));
             Destroy(gameObject);
         }
     }

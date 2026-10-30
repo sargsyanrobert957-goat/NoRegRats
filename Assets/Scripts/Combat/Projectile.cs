@@ -16,6 +16,8 @@ namespace NoRegRats
         [Tooltip("Distance travelled before the shot disappears, in world units.")]
         [SerializeField] float range = 6f;
         [SerializeField] int damage = 1;
+        [Tooltip("Colour of the paper scraps puffed out where it hits.")]
+        [SerializeField] Color impactColor = new Color(0.95f, 0.94f, 0.9f, 0.95f);
 
         Rigidbody2D body;
         GameObject owner;
@@ -56,8 +58,9 @@ namespace NoRegRats
             if (hit == owner)
                 return;
 
-            if (hit.TryGetComponent(out Health health))
-                health.TakeDamage(damage, body.position);
+            if (hit.TryGetComponent(out Health health) && health.TakeDamage(damage, body.position))
+                Sfx.Play(Sfx.Sound.Hit);
+            PuffSpawner.Burst(body.position, 4, 0.6f, 2.5f, impactColor);
             Despawn();
         }
 

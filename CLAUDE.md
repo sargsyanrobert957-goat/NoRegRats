@@ -57,19 +57,20 @@ Samvel Sardaryan.
 | `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot), `Trash` (the Rat King's) |
 | `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2), `RatKing` (8 HP, bite 2, trash 1) |
 | `Assets/Prefabs/Items/` | `Heart` (dropped by the Rat King) |
-| `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter` |
+| `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter`, `HeroEffects` |
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
 | `Assets/Scripts/Enemies/` | `RatEnemy`, `RatKing`, `TrashProjectile` |
 | `Assets/Scripts/Items/` | `HeartPickup` |
 | `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win, run time), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit`, `GoalTrigger`, `SpeechTrigger` |
 | `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar`, `HeartsDisplay`, `GoalText`, `SpeechBubble`, `TitleMenu`, `PauseMenu`, `WinScreen`, `GamePause` (freeze behind menus) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
 | `Assets/Scripts/Objects/` | `PushableBox` |
+| `Assets/Scripts/Effects/` | `PuffSpawner` (pooled dust / paper-scrap puffs), `Sfx` (sound effects), `Music` (level and boss tracks) |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet), `PolishSetup` (Tools > NoRegRats > Set Up Effects And Audio: HeroEffects on the Player, "Effects" and "Audio" objects in both scenes if missing) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -169,6 +170,21 @@ Samvel Sardaryan.
 - `GamePause.Freeze()` / `Unfreeze()`: time scale 0/1 and the Player action map off/on. Used by
   the title (shown once per launch, not after deaths or restarts), pause (Esc) and win screens.
   Restart and Play Again call `GameSession.StartNewRun()` then `ScreenFader.ReloadScene()`.
-- Text uses Unity's built-in font until a font is put in `Assets/Art/Fonts/`; `HudSetup` picks
-  the first one there for UI it creates. Existing Text components keep their font, so after
-  adding one, set it on the HUD's Text components (or select them all and change it at once).
+- Text uses Unity's built-in font until a font is put in `Assets/Art/Fonts/`;
+  `HudSetup` picks the first one there for UI it creates. Existing Text components keep their
+  font, so after adding one, set it on the HUD's Text components (or select them all and change
+  it at once).
+
+## Effects and audio
+
+- `PuffSpawner` (scene object "Effects"): `PuffSpawner.Spawn(position, size, velocity, color)`
+  and `Burst(position, count, size, speed, color)` from anywhere; a fixed pool reuses the oldest
+  puff, so nothing is allocated during play. Used for the hero's dust (`HeroEffects`: take-off,
+  landing, turning, every stride), shot impacts, rat and Rat King poofs, trash hits, the Heart.
+- `CameraFollow2D.ShakeActive(strength, duration)`: hard landings (falling 15+ u/s), the hero
+  getting hurt, the Rat King's defeat. A weaker shake never cuts a stronger one short.
+- `Sfx.Play(Sfx.Sound.X)` (scene object "Audio/Sound Effects"): Jump, Land, Step, Shoot, Hit
+  (a shot that does damage), RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate. Each sound has
+  a clip list (a random one plays, slightly random pitch) and a volume in the Inspector; empty
+  lists are silent. `Music` ("Audio/Music") plays the level track and switches to the boss
+  track during the fight (`Music.PlayBoss` / `PlayLevel`, short fade). No clips are assigned yet.

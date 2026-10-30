@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -60,6 +61,9 @@ namespace NoRegRats
         public Vector2 Velocity => body.linearVelocity;
         public float MoveSpeed => moveSpeed;
         public float CrouchSpeed => crouchSpeed;
+
+        /// <summary>Raised on the physics step a jump starts.</summary>
+        public event Action Jumped;
 
         Rigidbody2D body;
         CapsuleCollider2D capsule;
@@ -173,6 +177,7 @@ namespace NoRegRats
                 isRising = true;
                 canCutJump = true;
                 IsGrounded = false;
+                Jumped?.Invoke();
             }
 
             if (isRising)

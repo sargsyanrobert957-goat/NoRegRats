@@ -50,6 +50,7 @@ namespace NoRegRats
             int direction = movement.FacingDirection;
             Vector2 origin = (Vector2)bodyCollider.bounds.center + new Vector2(muzzleOffset.x * direction, muzzleOffset.y);
             pool.Get().Launch(origin, direction, gameObject, pool.Release);
+            Sfx.Play(Sfx.Sound.Shoot);
             if (heroAnimator != null)
                 heroAnimator.Recoil();
         }

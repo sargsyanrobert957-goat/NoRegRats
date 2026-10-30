@@ -40,6 +40,7 @@ namespace NoRegRats
             if (open == IsOpen)
                 return;
             IsOpen = open;
+            Sfx.Play(Sfx.Sound.Gate);
             if (!open)
                 gateCollider.enabled = true;
             if (sliding != null)

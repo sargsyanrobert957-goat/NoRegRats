@@ -149,6 +149,8 @@ namespace NoRegRats
         {
             bodyCollider.enabled = false;
             body.simulated = false;
+            Sfx.Play(Sfx.Sound.RatPoof);
+            PuffSpawner.Burst(bodyCollider.bounds.center, 7, 1.1f, 3f, new Color(0.55f, 0.5f, 0.53f, 0.95f));
             StartCoroutine(Poof());
         }
 

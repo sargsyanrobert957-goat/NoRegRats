@@ -137,6 +137,7 @@ namespace NoRegRats
             Vector2 target = player.position;
             float time = Mathf.Clamp(Mathf.Abs(target.x - origin.x) / throwPace, flightTime.x, flightTime.y);
             Instantiate(trashPrefab).Launch(origin, target, time);
+            Sfx.Play(Sfx.Sound.KingThrow);
         }
 
         void LateUpdate()
@@ -166,8 +167,12 @@ namespace NoRegRats
         void OnDied()
         {
             IsFighting = false;
+            Vector2 center = bodyCollider.bounds.center;
             bodyCollider.enabled = false;
             body.simulated = false;
+            Sfx.Play(Sfx.Sound.KingDefeated);
+            PuffSpawner.Burst(center, 14, 2.2f, 4f, new Color(0.55f, 0.5f, 0.53f, 0.95f));
+            CameraFollow2D.ShakeActive(0.35f, 0.4f);
             StartCoroutine(Defeat());
         }
 

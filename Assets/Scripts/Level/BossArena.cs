@@ -72,11 +72,13 @@ namespace NoRegRats
             healthBar.Show(king.Health);
             goalText.Show(fightGoal);
             speechBubble.Say(king.transform, kingSpeechHeight, fightLine, lineTime);
+            Music.PlayBoss();
         }
 
         void OnKingDefeated()
         {
             healthBar.Hide();
+            Music.PlayLevel();
             goalText.Show(heartGoal);
             speechBubble.Say(king.transform, kingSpeechHeight, defeatLine, lineTime);
         }

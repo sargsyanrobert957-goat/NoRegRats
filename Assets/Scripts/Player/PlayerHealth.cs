@@ -19,6 +19,8 @@ namespace NoRegRats
         [SerializeField] float restartDelay = 0.8f;
         [Tooltip("Extra hearts the Heart item gives, kept after dying.")]
         [SerializeField] int heartBonus = 1;
+        [Tooltip("Camera shake when hurt, in world units.")]
+        [SerializeField] float hurtShake = 0.15f;
 
         Health health;
         PlayerMovement movement;
@@ -56,6 +58,8 @@ namespace NoRegRats
             if (Mathf.Approximately(transform.position.x, source.x))
                 away = -movement.FacingDirection;
             movement.Knockback(new Vector2(away * knockback.x, knockback.y), knockbackTime);
+            Sfx.Play(Sfx.Sound.Hurt);
+            CameraFollow2D.ShakeActive(hurtShake, 0.2f);
         }
 
         void OnDied()

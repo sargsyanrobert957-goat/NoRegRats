@@ -5,8 +5,8 @@ namespace NoRegRats
     /// <summary>
     /// Smoothly follows a target, usually the player. Put it on the camera. Looks a little ahead in
     /// the direction the player faces and further down while they fall fast (dropping into the
-    /// sewers), never shows anything outside the level bounds, and can be locked onto a fixed spot
-    /// (the boss arena).
+    /// sewers), never shows anything outside the level bounds, can be locked onto a fixed spot
+    /// (the boss arena), and can shake (ShakeActive, for hard landings and hits).
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class CameraFollow2D : MonoBehaviour
@@ -31,7 +31,17 @@ namespace NoRegRats
         [Tooltip("The view never shows anything outside this area (world units). Width 0 = no limit.")]
         [SerializeField] Rect bounds;
 
+        [Header("Shake")]
+        [Tooltip("How fast the camera jitters while shaking.")]
+        [SerializeField] float shakeFrequency = 30f;
+
+        static CameraFollow2D active;
+
         Camera cam;
+        Vector3 followPosition;
+        float shakeStrength;
+        float shakeTime;
+        float shakeDuration;
         PlayerMovement movement;
         Vector3 velocity;
         float lead;
@@ -46,6 +56,23 @@ namespace NoRegRats
             cam = GetComponent<Camera>();
             if (target != null)
                 movement = target.GetComponent<PlayerMovement>();
+            followPosition = transform.position;
+            active = this;
+        }
+
+        void OnDestroy()
+        {
+            if (active == this)
+                active = null;
+        }
+
+        /// <summary>Shakes the scene's camera by up to <paramref name="strength"/> units, fading out over <paramref name="duration"/> seconds.</summary>
+        public static void ShakeActive(float strength, float duration)
+        {
+            if (active == null || strength < active.shakeStrength * (active.shakeTime / Mathf.Max(active.shakeDuration, 0.0001f)))
+                return;
+            active.shakeStrength = strength;
+            active.shakeTime = active.shakeDuration = duration;
         }
 
         /// <summary>Holds the camera on a fixed point until Unlock, e.g. while fighting the boss.</summary>
@@ -78,7 +105,18 @@ namespace NoRegRats
 
             goal = ClampToBounds(goal);
             var goal3 = new Vector3(goal.x, goal.y, transform.position.z);
-            transform.position = Vector3.SmoothDamp(transform.position, goal3, ref velocity, smoothTime);
+            followPosition = Vector3.SmoothDamp(followPosition, goal3, ref velocity, smoothTime);
+
+            // The shake is added on top of the smoothed position so it never builds up.
+            Vector3 shake = Vector3.zero;
+            if (shakeTime > 0f)
+            {
+                shakeTime -= Time.deltaTime;
+                float strength = shakeStrength * Mathf.Clamp01(shakeTime / shakeDuration);
+                float t = Time.time * shakeFrequency;
+                shake = new Vector3(Mathf.PerlinNoise(t, 0f) - 0.5f, Mathf.PerlinNoise(0f, t) - 0.5f, 0f) * (2f * strength);
+            }
+            transform.position = followPosition + shake;
         }
 
         Vector2 ClampToBounds(Vector2 center)
