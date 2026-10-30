@@ -51,22 +51,24 @@ Samvel Sardaryan.
 |---|---|
 | `Assets/Scenes/Level1.unity` | The prototype level (first in Build Settings): subway → shaft → sewers → boss arena. See "Level1" below |
 | `Assets/Scenes/MovementTest.unity` | Sandbox: ground, platforms, pushable crates, a tall block, a low ceiling, a crawl tunnel, one test rat of each type ("Test Rat", "Test Red-cap", "Test Jacket"). Second in Build Settings |
-| `Assets/Prefabs/Level/` | Level pieces: `Block` (dark ink rectangle, scale it), `Crate` (pushable), `TrainCar`, `StoneBridge`, `BrickLedge`, `ACUnit`, `Pipe`, `ScaffoldBar` (art with colliders on the solid part), `Sign_Sewers`, `Sign_Subway` (no collider) |
+| `Assets/Prefabs/Level/` | Level pieces: `Block` (dark ink rectangle, scale it), `Crate` (pushable), `TrainCar`, `StoneBridge`, `BrickLedge`, `ACUnit`, `Pipe`, `ScaffoldBar` (art with colliders on the solid part), `Sign_Sewers`, `Sign_Subway` (no collider), `Gate` (tiled bars + `SlidingGate`) |
 | `Assets/Prefabs/Player.prefab` | The player |
-| `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot) |
-| `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2) |
+| `Assets/Prefabs/Combat/` | `PaperBall` (the hero's shot), `Trash` (the Rat King's) |
+| `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2), `RatKing` (8 HP, bite 2, trash 1) |
+| `Assets/Prefabs/Items/` | `Heart` (dropped by the Rat King) |
 | `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerShooter` |
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
-| `Assets/Scripts/Enemies/` | `RatEnemy` |
-| `Assets/Scripts/Level/` | `GameSession` (what survives a death), `ParallaxBackground` |
-| `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Placeholder/`: `PaperBall.png`. `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit |
+| `Assets/Scripts/Enemies/` | `RatEnemy`, `RatKing`, `TrashProjectile` |
+| `Assets/Scripts/Items/` | `HeartPickup` |
+| `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit` |
+| `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar` |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
 | `Assets/Audio/` | Music and sound effects |
-| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it) |
+| `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
 ## Player
@@ -113,7 +115,15 @@ Samvel Sardaryan.
   (Plain rat on top) → stone bridge, Red-cap → crate puzzle (wall top 4.2 is above the 3.5 jump;
   push the crate against it, low stopper at x 31) → Plain rat → "SEWERS" shaft x 62–66 → Jacket
   rat → crouch gap under pipes at x 84–90 (1.4 high) → AC-unit steps → Jacket rat on a brick ledge
-  → arena x 112–134, y -20 to -10. Empty markers "Arena Gate Spot", "Rat King Spot", "Exit Spot".
+  → arena x 112–134, y -20 to -10 → exit hole at the bottom of the arena's right wall (x 134–136,
+  y -20 to -16) behind the exit grate, with the `LevelExit` trigger in it.
+- Boss fight (`Level/Arena/Boss Arena`, `BossArena`): its trigger covers the arena floor past the
+  entrance. On entry the `Entrance Gate` drops (`SlidingGate.Close`), the camera locks on
+  `Camera Spot`, the `Rat King` starts and `HUD`'s `BossHealthBar` shows. Beating him drops the
+  Heart; taking it (`HeartPickup.Collected`) opens the `Exit Grate` and unlocks the camera;
+  walking out through `LevelExit` calls `GameSession.Win()` (raises `GameSession.GameWon`) and
+  stops the controls. After a death with the Heart already taken, the King stays gone and the
+  exit starts open.
 - The hero can jump 3.5 up and about 4.5 across; keep new gaps and steps within that.
 - Camera (`CameraFollow2D`): looks ahead in the facing direction and down while falling fast,
   stays inside `bounds` (Level1: x -6..136, y -24..14), and `LockTo(center)` / `Unlock()` hold it
@@ -134,3 +144,13 @@ Samvel Sardaryan.
   collisions with the hero (`Physics2D.IgnoreCollision`); `ContactDamage` bites by distance check.
   Its single frame waddles (bob and tilt) on the `Visual` child, which is mirrored to face the
   walking direction. Rat types are the same setup with different Health / ContactDamage / speed.
+- `RatKing` idles until `StartFight()`, then walks toward the hero and every `throwInterval` (2 s)
+  stops, squashes for `windUpTime` (the telegraph) and throws a `TrashProjectile` on an arc that
+  lands on the hero (higher arcs for far throws). Trash flies through platforms, only hurts the
+  hero (1 heart), and vanishes just below the hero's height if it misses. Bite through
+  `ContactDamage` (2). On death: shrink-and-fade, the Heart drops, `Defeated` is raised.
+  The sketch faces left, so `artFacesRight` is off.
+- `HeartPickup` (trigger): `PlayerHealth.GainHeart()` (+1 max heart, refilled),
+  `GameSession.HasHeart = true`, raises the static `Collected` event.
+- The `HUD` canvas in Level1 (screen-space overlay, scales from 1920 x 1080) holds the boss bar;
+  the rest of the HUD goes there too.

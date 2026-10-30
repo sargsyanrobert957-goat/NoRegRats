@@ -47,6 +47,9 @@ namespace NoRegRats
             health.Died -= OnDied;
         }
 
+        /// <summary>The Heart item: one more max heart, refilled.</summary>
+        public void GainHeart() => health.SetMax(health.Max + heartBonus, refill: true);
+
         void OnDamaged(int amount, Vector2 source)
         {
             float away = Mathf.Sign(transform.position.x - source.x);
