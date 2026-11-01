@@ -64,7 +64,7 @@ namespace NoRegRats
 
         void OnDied()
         {
-            movement.enabled = false;
+            movement.InputLocked = true;
             if (TryGetComponent(out PlayerShooter shooter))
                 shooter.enabled = false;
             GameSession.RecordDeath();
