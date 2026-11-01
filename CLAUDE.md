@@ -166,7 +166,7 @@ Notes for Claude:
 | `Assets/Scripts/Items/` | `HeartPickup` |
 | `Assets/Scripts/Level/` | `GameSession` (what survives a death, the win, run time), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit`, `GoalTrigger`, `SpeechTrigger` |
 | `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar`, `HeartsDisplay`, `GoalText`, `SpeechBubble`, `TitleMenu`, `PauseMenu`, `WinScreen`, `GamePause` (freeze behind menus) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Street/`: the team artist's street pieces (Ground1–4 sidewalk slabs, Street road strip, Tile1/1_2/2/3 floating sidewalk chunks, FireHydrant, GarbageBin, PowerBox), sized from their mockup. `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png` and `Hero_Run_1..8.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Street/`: the team artist's street pieces (Ground1–4 sidewalk slabs, Street road strip, Tile1/1_2/2/3 floating sidewalk chunks, FireHydrant, GarbageBin, PowerBox), sized from their mockup. `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `Background/Resources/`: `City1_*.png` / `City2_*.png`, the team's two skylines split into `Far`, `Mid` and `Near` layers with transparent backgrounds (replace with same-named PNGs). `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
 | `Assets/Scripts/Objects/` | `PushableBox` |
 | `Assets/Scripts/Effects/` | `PuffSpawner` (pooled dust / paper-scrap puffs), `Sfx` (sound effects), `Music` (level and boss tracks) |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
@@ -240,7 +240,11 @@ Notes for Claude:
   on a spot (for the arena).
 - Background: one tiled `GraphPaper` sprite with `ParallaxBackground` (drifts at 0.6 of the
   camera's movement, tint by depth: blue-grey subway, green-grey sewers). It must stay big
-  enough to cover the view everywhere (110 x 44 units now).
+  enough to cover the view everywhere (110 x 44 units now). Above ground, `ParallaxBackground`
+  covers it at runtime with a white sky and the city's `Far`, `Mid` and `Near` layers (the two
+  pictures side by side, loaded from `Resources`, so none of it is in the scene). Each layer has
+  its own `parallax` (0.9, 0.75, 0.55), so the nearest slides fastest. The rock blocks hide the
+  city from underground, where the paper still shows.
 
 ## Combat and enemies
 
