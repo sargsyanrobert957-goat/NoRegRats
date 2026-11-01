@@ -61,6 +61,8 @@ namespace NoRegRats
         public Vector2 Velocity => body.linearVelocity;
         public float MoveSpeed => moveSpeed;
         public float CrouchSpeed => crouchSpeed;
+        /// <summary>Ignores the controls, e.g. once the hero is dead. They still slow down and land as usual.</summary>
+        public bool InputLocked { get; set; }
 
         /// <summary>Raised on the physics step a jump starts.</summary>
         public event Action Jumped;
@@ -115,6 +117,14 @@ namespace NoRegRats
         // Input is read every frame so quick taps are never missed; physics happens in FixedUpdate.
         void Update()
         {
+            if (InputLocked)
+            {
+                moveInput = 0f;
+                crouchHeld = false;
+                jumpHeld = false;
+                return;
+            }
+
             moveInput = moveAction.ReadValue<Vector2>().x;
             crouchHeld = crouchAction.IsPressed();
             jumpHeld = jumpAction.IsPressed();

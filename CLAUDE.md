@@ -209,7 +209,9 @@ Notes for Claude:
   in. Reloading is the respawn: every rat (and later the Rat King) comes back at full HP. Only
   `GameSession` survives (death count, `HasHeart`); with the Heart, `PlayerHealth` adds
   `heartBonus` to max hearts on start. `GameSession.StartNewRun()` clears it for a fresh run.
-  `DamageFlash` tints the hero red and blinks it while invulnerable.
+  `DamageFlash` tints the hero red and blinks it while invulnerable and after dying, so the last
+  hit looks like any other: on death `PlayerMovement.InputLocked` only ignores the controls, and
+  the hero still slows down and lands until the level fades out.
 
 ## Level1
 
