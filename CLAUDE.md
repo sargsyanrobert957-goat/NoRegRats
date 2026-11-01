@@ -270,7 +270,9 @@ Notes for Claude:
   `Goal` (top centre, `GoalText`), `Boss Bar` (bottom centre, `BossHealthBar`), `Speech`
   (`SpeechBubble`: one line at a time above a world object, follows it on screen), and the
   `Title Menu`, `Pause Menu`, `Win Screen` panels (components on the HUD root). An `EventSystem`
-  with `InputSystemUIInputModule` (project-wide UI actions) drives the buttons.
+  with `InputSystemUIInputModule` (project-wide UI actions) drives the buttons. The HUD has no
+  `GraphicRaycaster` in the scene, so `TitleMenu` adds one at runtime; without it the mouse can't
+  reach any menu. Test menus with real clicks, not by calling `onClick` from code.
 - Goal steps: "Get to the sewers" (start) → "Find the Rat King" (`Sewers Goal` trigger) →
   "Defeat the Rat King" → "Take the Heart" → "Escape through the grate!" (set by `BossArena`).
 - Lines: the start's `Joke Sign Line` (`SpeechTrigger` on the SUBWAY sign) and the Rat King's
