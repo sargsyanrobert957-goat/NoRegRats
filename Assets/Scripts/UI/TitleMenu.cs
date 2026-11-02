@@ -20,6 +20,14 @@ namespace NoRegRats
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetOnLaunch() => shownThisLaunch = false;
 
+        // The HUD canvas (this object) has no GraphicRaycaster in the scene, and without one the
+        // mouse can't reach any of the menus' buttons.
+        void Awake()
+        {
+            if (!TryGetComponent(out GraphicRaycaster _))
+                gameObject.AddComponent<GraphicRaycaster>();
+        }
+
         void Start()
         {
             playButton.onClick.AddListener(Play);

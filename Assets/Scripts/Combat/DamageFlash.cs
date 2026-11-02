@@ -4,7 +4,7 @@ namespace NoRegRats
 {
     /// <summary>
     /// Feedback for getting hit: tints the sprite for a moment, and optionally blinks it for as long
-    /// as the Health stays invulnerable afterwards (used on the hero).
+    /// as the Health stays invulnerable afterwards (used on the hero, who also blinks once dead).
     /// </summary>
     [RequireComponent(typeof(Health))]
     public class DamageFlash : MonoBehaviour
@@ -37,11 +37,13 @@ namespace NoRegRats
 
         void LateUpdate()
         {
-            // A death effect may be fading the sprite out; leave its colour alone.
-            if (health.IsDead)
+            // A death effect may be fading the sprite out; leave its colour alone. Only things that
+            // don't blink have one: the hero keeps blinking until the level restarts.
+            if (health.IsDead && !blinkWhileInvulnerable)
                 return;
             Color color = Time.time < flashUntil ? flashColor : Color.white;
-            if (blinkWhileInvulnerable && health.IsInvulnerable && Mathf.Repeat(Time.time * blinkRate, 1f) < 0.5f)
+            bool blinking = blinkWhileInvulnerable && (health.IsInvulnerable || health.IsDead);
+            if (blinking && Mathf.Repeat(Time.time * blinkRate, 1f) < 0.5f)
                 color.a = blinkAlpha;
             target.color = color;
         }

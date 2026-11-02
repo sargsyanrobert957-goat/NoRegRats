@@ -17,6 +17,10 @@ namespace NoRegRats
         public const float PixelsPerUnit = 870f;
         const int MaxSize = 512;
 
+        // Backgrounds fill the screen, so they keep more of their pixels.
+        const string BackgroundFolder = ArtFolder + "Background/";
+        const int BackgroundMaxSize = 2048;
+
         void OnPreprocessTexture()
         {
             if (!assetPath.StartsWith(ArtFolder) || !assetImporter.importSettingsMissing)
@@ -26,7 +30,7 @@ namespace NoRegRats
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = PixelsPerUnit;
-            importer.maxTextureSize = MaxSize;
+            importer.maxTextureSize = assetPath.StartsWith(BackgroundFolder) ? BackgroundMaxSize : MaxSize;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;
 
