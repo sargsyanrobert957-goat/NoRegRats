@@ -5,15 +5,13 @@ namespace NoRegRats
 {
     /// <summary>
     /// The current goal at the top of the screen. GoalTrigger and BossArena change it as the hero
-    /// progresses; each change pops the text bigger for a moment so it gets noticed.
+    /// progresses (none is shown at the start); each change pops the text bigger for a moment so it gets noticed.
     /// </summary>
     public class GoalText : MonoBehaviour
     {
         [SerializeField] Text label;
         [Tooltip("Written before every goal.")]
         [SerializeField] string prefix = "Goal: ";
-        [Tooltip("Goal shown when the level starts.")]
-        [SerializeField] string startGoal = "Get to the sewers";
         [Tooltip("How much bigger the text pops when the goal changes.")]
         [SerializeField] float popScale = 1.3f;
         [Tooltip("Seconds the pop takes to settle.")]
@@ -22,7 +20,8 @@ namespace NoRegRats
         string goal;
         float popTimer;
 
-        void Awake() => Show(startGoal);
+        // Nothing is shown when the level starts; the first goal appears when the hero reaches it.
+        void Awake() => label.text = "";
 
         public void Show(string newGoal)
         {
