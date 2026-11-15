@@ -27,16 +27,14 @@ escape → You Won. Losing all 3 lives shows You Lost.
 Done: hero art and animation, movement (run, jump, crouch, push), bare-handed punching, health,
 3 lives and respawn, three rat types, the Rat King, the Heart item, the level, the street and
 subway art, HUD (hearts, lives, goal, boss bar, speech bubbles), the drawn title / pause /
-You Won / You Lost screens, dust and camera-shake effects, and sound and music hooks.
+You Won / You Lost screens, dust and camera-shake effects, sound effects and music (free packs, see `Assets/Audio/CREDITS.md`).
 
 Still open (ask Robert who is taking what before starting one):
 
 | Task | What it needs | How it plugs in |
 |---|---|---|
-| Sound effects | WAV or OGG files: jump, land, footstep, punch (a whoosh, for a miss), hit, rat poof, hurt, King throw, King defeated, Heart, gate, menu click | See "Adding sounds and music" below. No code changes |
 | Brass knuckles | Item art; then code: picking them up raises punch damage | Not started. `PlayerPunch`'s `damage` is the value to raise |
 | Pause button drawing | A PNG of the in-game pause button, saved over `Assets/Art/UI/Menus/PauseButton.png` | The current one is a stand-in drawn to match the menu buttons |
-| Music | A level track and a boss track | Same as sound effects |
 | Hand-drawn font | A `.ttf` or `.otf` file | See "Adding a font" below |
 | Final art for rats, Rat King, Heart, sewer pieces | PNGs with transparent backgrounds | See "Replacing art" below. The current ones are cut out of the paper-prototype photos |
 | Windows build and submission files | Unity, File > Build Profiles | See "Building the game" below |
@@ -87,14 +85,16 @@ Notes for Claude:
 
 ### Adding sounds and music
 
-1. Put the files in `Assets/Audio/` (any name; WAV or OGG).
-2. Open the scene, select `Audio/Sound Effects`, and in the `Sfx` component drag each file into
-   the Clips list of the matching sound (Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow,
-   KingDefeated, Heart, Gate, Click). Several clips for one sound = a random one plays each time. Adjust
-   Volume per sound.
-3. Select `Audio/Music` and set Level Track and Boss Track.
-4. Do this in both scenes that should have sound (Level1, MovementTest). Level1 only with
-   Robert's go-ahead (step 3 above), or send the files to Robert.
+The current sounds and music are in `Assets/Audio/SFX/` and `Assets/Audio/Music/` and already
+assigned in Level1 and MovementTest. To swap or add a sound:
+
+1. Put the file in `Assets/Audio/SFX/` or `Assets/Audio/Music/` (WAV or OGG), and add its source
+   to `Assets/Audio/CREDITS.md`. Only use free sounds that need no credit (CC0 or similar).
+2. Open the scene, select `Audio/Sound Effects`, and in the `Sfx` component drag the file into
+   the Clips list of the matching sound. Several clips for one sound = a random one plays each
+   time. Adjust Volume per sound. New sounds go at the end of the `Sfx.Sound` list.
+3. Select `Audio/Music` and set Level Track, Boss Track and Menu Track.
+4. Do this in both scenes that should have sound (Level1, MovementTest).
 
 ### Adding a font
 
@@ -163,21 +163,21 @@ Notes for Claude:
 | `Assets/Prefabs/Level/Subway/` | The team's subway ("Level 2") art as prefabs: `Platform` (the tiled platform floor, no collider), `PlatformTile_Single` / `_Double` / `_Triple` (floating platforms), `FireExtinguisher`, `WetFloorSign`, `RecycleBins`, `PhoneBooth` (solid props). Pivots on the walking line or base, as for the street |
 | `Assets/Prefabs/Player.prefab` | The player |
 | `Assets/Prefabs/Combat/` | `PaperBall` (the old shot, unused since the hero punches), `Trash` (the Rat King's) |
-| `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2), `RatKing` (8 HP, bite 2, trash 1) |
+| `Assets/Prefabs/Enemies/` | `Rat_Plain` (2 HP, bite 1), `Rat_RedCap` (3 HP, bite 1), `Rat_Jacket` (4 HP, bite 2), `Rat_Thug` (the chain rat, Rat1: 5 HP, bite 2, slow), `Rat_Gunner` (the gun rat, Rat2: 3 HP, bite 1, shoots), `RatKing` (8 HP, bite 2, trash 1) |
 | `Assets/Prefabs/Items/` | `Heart` (dropped by the Rat King) |
 | `Assets/Scripts/Player/` | `PlayerMovement`, `HeroAnimator`, `PlayerHealth`, `PlayerPunch`, `HeroEffects` |
 | `Assets/Scripts/Combat/` | `Health`, `DamageFlash`, `Projectile`, `ContactDamage` |
-| `Assets/Scripts/Enemies/` | `RatEnemy`, `RatKing`, `TrashProjectile` |
+| `Assets/Scripts/Enemies/` | `RatEnemy`, `RatAnimator`, `RatShooter`, `EnemyBullet`, `RatKing`, `TrashProjectile` |
 | `Assets/Scripts/Items/` | `HeartPickup` |
 | `Assets/Scripts/Level/` | `GameSession` (lives, what survives a death, the win or loss, run time), `ParallaxBackground`, `BossArena`, `SlidingGate`, `LevelExit`, `GoalTrigger`, `SpeechTrigger` |
 | `Assets/Scripts/UI/` | `ScreenFader` (fade out, reload the level, fade in), `BossHealthBar`, `HeartsDisplay`, `LivesDisplay`, `ControlsHint`, `GoalText`, `SpeechBubble`, `TitleMenu`, `PauseMenu`, `WinScreen`, `LoseScreen`, `MenuButtonFeedback`, `GamePause` (freeze behind menus) |
-| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png`, `Hero_Run_1..8.png`, `Hero_Punch_1.png` (guard) and `Hero_Punch_2.png` (arm out), and `Hero_Hurt.png` (originals at full size; imported capped at 512 px). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Street/`: the team artist's street pieces (Ground1–4 sidewalk slabs, Street road strip, Tile1/1_2/2/3 floating sidewalk chunks, FireHydrant, GarbageBin, PowerBox), sized from their mockup. `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `Background/Resources/`: `City1_*.png` / `City2_*.png`, the team's two skylines split into `Far`, `Mid` and `Near` layers with transparent backgrounds (replace with same-named PNGs). `Subway/`: the team artist's subway pieces (Ground platform floor, Tile1–3 floating tiles, FireExtinguisher, WetFloorSign, RecycleBin, PhoneBooth), sized from their mockup. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`; `UI/Menus/`: the team's menu drawings, cut from their mockups: `Title/` (Title, Start, Continue, Exit, Character), `Window.png` (the frame shared by pause / won / lost), `Restart.png`, `Quit.png`, `Controls.png` (the controls sheet; its last line, "SPACE → Punch", is built from letters cut from the other four), `PauseButton.png` (stand-in for the in-game pause button), `Paused/Continue.png`, `YouWon/` (YouWon, Stats labels, PlayAgain, Quit), `YouLost/YouLost.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
+| `Assets/Art/` | Drawn art. `Hero/`: `Hero_Idle.png`, `Hero_Run_1..8.png`, `Hero_Punch_1.png` (guard) and `Hero_Punch_2.png` (arm out), and `Hero_Hurt.png` (originals at full size; imported capped at 512 px). `Rats/Rat1/` and `Rats/Rat2/`: the team artist's chain rat (`Rat1_Anim_1..8`, `Rat1_Standing`, `Rat1_Hit`) and gun rat (`Rat2_Standing`, `Rat2_Shoot_1..4`, `Rat2_Hit`, `Bullet`); both drawn facing left, full-size originals (imported capped at 512 px; Rat1 is 1.8 units tall on its canvas and Rat2 1.65, feet on the origin). `Rats/`: `Rat_Plain.png`, `Rat_RedCap.png`, `Rat_Jacket.png`, `RatKing.png`, cut out of the paper-prototype sketch photos (placeholders; replace with same-named PNGs). `Items/Heart.png` (cut out). `Placeholder/`: `PaperBall.png`, `Trash.png`, `Bars.png` (tiles vertically, 1 x 4 units), `Puff.png` (scribble puff, 1 unit). `Level/`: level pieces cut out of the sketch photos (the train car is one drawn end mirrored; the two signs were redrawn because their light grey can't be separated from the grid). `Street/`: the team artist's street pieces (Ground1–4 sidewalk slabs, Street road strip, Tile1/1_2/2/3 floating sidewalk chunks, FireHydrant, GarbageBin, PowerBox), sized from their mockup. `Background/GraphPaper.png`: generated, tiles at 1 cell = 1 unit. `Background/Resources/`: `City1_*.png` / `City2_*.png`, the team's two skylines split into `Far`, `Mid` and `Near` layers with transparent backgrounds (replace with same-named PNGs). `Subway/`: the team artist's subway pieces (Ground platform floor, Tile1–3 floating tiles, FireExtinguisher, WetFloorSign, RecycleBin, PhoneBooth), sized from their mockup. `UI/`: `HeartFull.png` / `HeartEmpty.png` (made from the Heart cut-out), `SpeechBubble.png`; `UI/Menus/`: the team's menu drawings, cut from their mockups: `Title/` (Title, Start, Continue, Exit, Character), `Window.png` (the frame shared by pause / won / lost), `Restart.png`, `Quit.png`, `Controls.png` (the controls sheet; its last line, "SPACE → Punch", is built from letters cut from the other four), `PauseButton.png` (stand-in for the in-game pause button), `Paused/Continue.png`, `YouWon/` (YouWon, Stats labels, PlayAgain, Quit), `YouLost/YouLost.png`. `Fonts/` (not there yet): put the hand-drawn font here; see "UI" |
 | `Assets/Scripts/Objects/` | `PushableBox` |
-| `Assets/Scripts/Effects/` | `PuffSpawner` (pooled dust / paper-scrap puffs), `Sfx` (sound effects), `Music` (level and boss tracks) |
+| `Assets/Scripts/Effects/` | `PuffSpawner` (pooled dust / paper-scrap puffs), `Sfx` (sound effects), `Music` (menu, level and boss tracks) |
 | `Assets/Scripts/Camera/` | `CameraFollow2D` (on the Main Camera) |
 | `Assets/Sprites/Placeholder/` | Generated stand-in art (crate, white square used for platforms) |
 | `Assets/Physics/` | `NoFriction.physicsMaterial2D` (on the player so it never sticks to walls) |
-| `Assets/Audio/` | Music and sound effects |
+| `Assets/Audio/` | `SFX/` (sound effects), `Music/` (menu, level and boss loops), `CREDITS.md` (where each file came from) |
 | `Assets/Editor/` | Editor-only scripts. `ArtImportSettings` (first-import sprite settings for `Assets/Art/`), `HeroSetup` (Tools > NoRegRats > Set Up Hero Sprite: the hero frames' pivots and the HeroAnimator's idle, run, punch and hurt frames), `CombatSetup` (Tools > NoRegRats > Set Up Combat: sprite sizes, PaperBall and rat prefabs if missing (stats in its `RatTypes` table), the Player's combat components, the test rats), `MovementTestSetup` (Tools > NoRegRats > Set Up Push And Crouch Test), `Level1Builder` (Tools > NoRegRats > Build Level1: creates missing level-piece prefabs and builds Level1 only if it doesn't exist; never overwrites it), `BossArenaSetup` (Tools > NoRegRats > Set Up Boss Arena: boss prefabs if missing, and the fight added to Level1's arena if not there yet), `HudSetup` (Tools > NoRegRats > Set Up HUD: Level1's UI, EventSystem, goal and joke-sign triggers if not there yet), `PolishSetup` (Tools > NoRegRats > Set Up Effects And Audio: HeroEffects on the Player, "Effects" and "Audio" objects in both scenes if missing), `StreetDressing` (Tools > NoRegRats > Dress Level1 Street: street prefabs if missing, and Level1's first section dressed with them if not already), `PunchSetup` (Tools > NoRegRats > Set Up Punching: PlayerPunch on the Player instead of the old shooter, the Rat King's stop distance), `MenuSetup` (Tools > NoRegRats > Set Up Menus: the drawn title / pause / won / lost screens, the lives counter, the HUD pause button and the controls hint, replacing the old plain menus if the drawn ones aren't there), `SubwaySetup` (Tools > NoRegRats > Build Subway Station: subway prefabs if missing, and the station added between the street and the sewers if not there yet, moving everything after it right by 56) |
 | `Assets/Settings/` | URP / 2D renderer assets, input actions (from the template) |
 
@@ -236,7 +236,7 @@ Notes for Claude:
   `Level/Subway Station`, `Level/Shaft`, `Level/Sewers`, `Level/Arena`, so pieces and whole
   sections can be moved, added or swapped in the editor.
 - The first section (group `Level/Subway`) is dressed as a street by `StreetDressing`: sidewalk
-  slabs and the road strip over the floor `Block`, and the team's props as the platforms.
+  slabs over the floor `Block` (the road strip was removed from Level1; the `Road` prefab is still there), and the team's props as the platforms.
 - The subway station (group `Level/Subway Station`, added by `SubwaySetup`) sits between the
   street and the sewers: the tiled platform floor over a rock `Floor`, a rock `Ceiling`, the
   team's subway props and floating tiles.
@@ -249,8 +249,8 @@ Notes for Claude:
   → fire extinguisher (x 70), wet-floor sign (72.5), Plain rat → recycling bins (x 82, top -6.5)
   → double tiles (x 86.5 at -5, x 91 at -3 with an extinguisher) → phone booth (x 96, top -5.35,
   jumped over), Red-cap → single tile (x 101, -4.5) → triple tile (x 106.5, -5) → Jacket rat →
-  wet-floor sign, bins → "SEWERS" shaft x 118–122 → Jacket rat → crouch gap under pipes at
-  x 140–146 (1.4 high) → AC-unit steps → Jacket rat on a brick ledge → arena x 168–190, y -20 to
+  wet-floor sign, bins → "SEWERS" shaft x 118–122 → Jacket rat → chain rat (`Rat Thug`, x 134) → crouch gap under pipes at
+  x 140–146 (1.4 high) → AC-unit steps → Jacket rat on a brick ledge → Gun rat (`Rat Gunner`, x 163) → arena x 168–190, y -20 to
   -10 → exit hole at the bottom of the arena's right wall (x 190–192, y -20 to -16) behind the
   exit grate, with the `LevelExit` trigger in it.
 - Boss fight (`Level/Arena/Boss Arena`, `BossArena`): its trigger covers the arena floor past the
@@ -285,6 +285,8 @@ Notes for Claude:
   collisions with the hero (`Physics2D.IgnoreCollision`); `ContactDamage` bites by distance check.
   Its single frame waddles (bob and tilt) on the `Visual` child, which is mirrored to face the
   walking direction. Rat types are the same setup with different Health / ContactDamage / speed.
+- `Rat_Thug` (Rat1) is a `RatEnemy` (5 HP, bite 2, speed 1.1) with a `RatAnimator`: it loops the artist's eight frames while walking and shows the "punched back" frame when hit. The drawing faces left, so the sprite has `flipX` on (RatEnemy mirrors the `Visual` child for the walking direction).
+- `Rat_Gunner` (Rat2) is a `RatShooter` (3 HP, bite 1): it stands still, faces the hero, and when the hero is within `sightRange` (11), within `sightHeight` (2.5) of its height and not behind a wall, raises the gun for `aimTime` (0.5 s, the warning), fires an `EnemyBullet` straight along the floor (second shoot frame, `Sfx.Gunshot`), recoils, then waits `fireInterval` (1.8 s). A punch cancels the shot and staggers it. The bullet hurts only the hero (1 heart), passes through rats and the King, and vanishes on walls or after its range; the hero can jump it. Tune everything in the Inspector.
 - `RatKing` idles until `StartFight()`, then walks toward the hero, stopping `stopDistance` (1.7)
   away, just short of his bite, so the hero has to step in to punch him. Every `throwInterval` (2 s) he
   stops, squashes for `windUpTime` (the telegraph) and throws a `TrashProjectile` on an arc that
@@ -347,8 +349,10 @@ Notes for Claude:
   getting hurt, the Rat King's defeat. A weaker shake never cuts a stronger one short.
 - `Sfx.Play(Sfx.Sound.X)` (scene object "Audio/Sound Effects"): Jump, Land, Step, Punch (a punch
   that hits nothing), Hit (a punch that lands), RatPoof, Hurt, KingThrow, KingDefeated, Heart,
-  Gate, Click (menu buttons). Sounds are saved by number in the scenes, so new ones go at the end
+  Gate, Click (menu buttons), Gunshot (for the shooting rat, `RatShooter`), Push (the scrape every 0.45 s while a box or bin is pushed, from `PushableBox`). Sounds are saved by number in the scenes, so new ones go at the end
   of the list (Punch was Shoot). Each sound has
   a clip list (a random one plays, slightly random pitch) and a volume in the Inspector; empty
   lists are silent. `Music` ("Audio/Music") plays the level track and switches to the boss
-  track during the fight (`Music.PlayBoss` / `PlayLevel`, short fade). No clips are assigned yet.
+  track during the fight (`Music.PlayBoss` / `PlayLevel`, short fade). While the title screen is
+  up it plays the menu track (`Music.PlayMenu`, called by `TitleMenu`; `Music.ResumeGame` goes back
+  to the level or boss track). The clips are in `Assets/Audio/SFX/` and `Assets/Audio/Music/` (credits in `Assets/Audio/CREDITS.md`) and are assigned in Level1 and MovementTest. Click plays one of two clips, King defeated is two explosions joined into one file.
