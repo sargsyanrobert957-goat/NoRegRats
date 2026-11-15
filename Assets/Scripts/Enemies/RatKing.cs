@@ -5,10 +5,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The boss. Waits until BossArena starts the fight, then stomps slowly toward the hero and every
-    /// few seconds stops, winds up (a visible squash) and throws a piece of trash in an arc at them.
-    /// Bites on contact through ContactDamage. On defeat he shrinks away and drops the Heart. If the
-    /// Heart was already taken earlier in the run (the hero died after the fight), he stays gone.
+    /// The boss. After BossArena starts the fight he walks toward the hero and every few seconds winds
+    /// up and throws trash. He bites on contact. On defeat he drops the Heart, or stays gone if it was
+    /// already taken.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
     public class RatKing : MonoBehaviour

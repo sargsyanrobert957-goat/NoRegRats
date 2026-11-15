@@ -4,8 +4,7 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// The lives left, under the hearts. After a death (the level has just reloaded with a life
-    /// fewer) it pops and flashes for a moment so the loss is noticed.
+    /// The lives left, under the hearts. It pops and flashes after a death.
     /// </summary>
     public class LivesDisplay : MonoBehaviour
     {

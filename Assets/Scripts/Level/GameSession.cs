@@ -4,9 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// What survives a death. Dying reloads the level, which puts every rat and the Rat King back;
-    /// only these values carry over: the lives left, the death count and whether the Heart was
-    /// taken. Also holds whether the run is won or lost and how long it has taken.
+    /// What survives a death or reload: lives left, death count, whether the Heart was taken, and the
+    /// win/lose state and run time.
     /// </summary>
     public static class GameSession
     {

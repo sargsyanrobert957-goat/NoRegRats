@@ -4,9 +4,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// A speech bubble on the HUD that hangs above someone in the world (the Rat King, a sign) for a
-    /// few seconds, following them on screen. If the speaker disappears mid-line (the beaten King),
-    /// it stays where they last were. One line at a time; a new line replaces the old one.
+    /// A speech bubble that follows a speaker (the Rat King, a sign) for a few seconds. One line at a
+    /// time.
     /// </summary>
     public class SpeechBubble : MonoBehaviour
     {

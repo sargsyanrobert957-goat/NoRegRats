@@ -3,10 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// A bullet from the shooting rat: flies straight at a fixed speed, hurts the hero if it touches
-    /// them, passes through other rats and the Rat King, and disappears on any wall or platform or
-    /// after its range. Needs a trigger collider and a Dynamic Rigidbody2D with gravity 0 (Dynamic so
-    /// it also notices walls and platforms).
+    /// The gun rat's bullet: flies straight, hurts the hero, passes through other rats and disappears
+    /// on walls or after its range.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class EnemyBullet : MonoBehaviour

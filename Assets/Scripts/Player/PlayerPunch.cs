@@ -6,10 +6,8 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// The hero's bare-handed punch: Attack (Space) hits everything with a Health in a short box in
-    /// front of the hero, with a cooldown. Every punch plays the drawn punch and puffs at the fist; a hit also plays the Hit sound and gives a tiny camera shake, a miss plays the Punch
-    /// whoosh. Hits use an overlap check, so rats (which pass through the hero) are hit too.
-    /// A mouse click on a HUD button (the pause button) doesn't punch.
+    /// The hero's punch (Space): hits everything with a Health in a short box in front, with a
+    /// cooldown. Plays the punch drawing, puffs, sounds and a small camera shake on a hit.
     /// </summary>
     [RequireComponent(typeof(PlayerMovement))]
     public class PlayerPunch : MonoBehaviour

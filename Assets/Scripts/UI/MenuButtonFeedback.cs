@@ -5,12 +5,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// Makes a drawn menu button react: it grows a little and tilts while it's the one picked (by the
-    /// mouse or the keyboard / gamepad), squashes while pressed, and plays the Click sound. In menus,
-    /// hovering with the mouse also selects it, so mouse and keyboard always agree on which button
-    /// is lit. A button used during play (the HUD's pause button) only lights up on hover instead,
-    /// so Space (attack, and the UI's submit) can't press it. Uses unscaled time, since menus are
-    /// open while the game is frozen.
+    /// Makes a drawn menu button react: it grows and tilts when selected, squashes when pressed and
+    /// plays the Click sound. HUD buttons only react to hover, so Space can't press them.
     /// </summary>
     [RequireComponent(typeof(Button))]
     public class MenuButtonFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler

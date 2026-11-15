@@ -4,8 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Background music: the level track from the start, the boss track during the Rat King fight
-    /// (BossArena switches them), with a short fade between. Silent until tracks are assigned.
+    /// Background music: menu, level and boss tracks with a short fade between. Silent until tracks are
+    /// assigned.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class Music : MonoBehaviour

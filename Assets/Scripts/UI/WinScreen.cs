@@ -6,9 +6,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// "You Won!!!" with the run's stats (time, deaths, hearts left) written next to the drawn
-    /// labels, shown a moment after the hero walks out of the exit. Play Again starts a fresh run;
-    /// Quit goes back to the title.
+    /// The "You Won" screen with the run's stats (time, deaths, hearts left). Play Again begins a fresh
+    /// run; Quit returns to the title.
     /// </summary>
     public class WinScreen : MonoBehaviour
     {

@@ -3,10 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Smoothly follows a target, usually the player. Put it on the camera. Looks a little ahead in
-    /// the direction the player faces and further down while they fall fast (dropping into the
-    /// sewers), never shows anything outside the level bounds, can be locked onto a fixed spot
-    /// (the boss arena), and can shake (ShakeActive, for hard landings and hits).
+    /// Smooth camera follow with look-ahead, extra drop when falling fast, level bounds, a lock for the
+    /// boss arena, and shake.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class CameraFollow2D : MonoBehaviour

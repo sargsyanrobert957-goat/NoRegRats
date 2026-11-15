@@ -4,10 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Sound effects. One per scene, on an object with an AudioSource; gameplay code calls the
-    /// static Sfx.Play(Sound.Jump) etc. Each sound gets one or more clips (a random one plays, at a
-    /// slightly random pitch so repeats don't sound identical) and a volume. Sounds with no clips
-    /// are simply silent, so the game works before any audio is added.
+    /// Sound effects. Gameplay calls Sfx.Play(Sound.X); each sound has one or more clips (one chosen at
+    /// random, with slight pitch variation) and a volume. A sound with no clips is silent.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class Sfx : MonoBehaviour

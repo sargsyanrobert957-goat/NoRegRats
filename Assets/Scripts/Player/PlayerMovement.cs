@@ -5,12 +5,9 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// Side-scrolling player movement: running at one speed, crouching while Crouch is held, pushing
-    /// PushableBoxes by walking into them, and jumping with coyote time, jump buffering and variable
-    /// jump height (let go of Jump early for a short hop).
-    /// Reads the "Player/Move", "Player/Jump" and "Player/Crouch" actions from the project-wide
-    /// input actions (Assets/Settings/InputSystem_Actions.inputactions). Facing and visuals are
-    /// handled by HeroAnimator.
+    /// Side-scrolling movement: run, crouch, push boxes, and jump with coyote time, jump buffering and
+    /// variable height. Reads the Player/Move, Jump and Crouch input actions; HeroAnimator handles the
+    /// visuals.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
     public class PlayerMovement : MonoBehaviour

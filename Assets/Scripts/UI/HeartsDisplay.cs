@@ -5,9 +5,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// The hero's hearts in the corner of the screen: one icon per max heart, full or empty, kept in
-    /// sync with the hero's Health. When the max goes up (the Heart item) a "+1" pops up beside them.
-    /// Icons are copies of a hidden template Image under a layout group.
+    /// The hero's hearts on screen, one icon per max heart, kept in sync with Health. A "+1" pops up
+    /// when the max goes up.
     /// </summary>
     public class HeartsDisplay : MonoBehaviour
     {

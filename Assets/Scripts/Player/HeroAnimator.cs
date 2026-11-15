@@ -3,15 +3,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Shows the hero's drawn frames and fakes the animations that aren't drawn yet with squash and
-    /// stretch: the run cycle plays in step with ground speed, the standing frame breathes, the air
-    /// uses one run frame stretched while rising and squashed while falling, take-off and landing
-    /// get a quick squash/stretch that springs back, crouching squashes the figure and pushing leans
-    /// it forward. Punching plays the drawn punch (guard, arm out, guard), and getting hurt shows
-    /// the drawn hurt pose for a moment (and stays on it while dead). Faces the player's
-    /// FacingDirection by mirroring this object.
-    /// Put it on the "Visual" child, positioned at the bottom of the player's collider, with sprites
-    /// whose pivot is at the feet so all scaling keeps the feet planted.
+    /// Shows the hero's drawn frames and adds squash and stretch where nothing is drawn: run cycle,
+    /// idle breathing, jump, landing, crouch and push lean, plus the drawn punch and hurt poses. Put it
+    /// on the Visual child with the sprite pivots at the feet.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class HeroAnimator : MonoBehaviour

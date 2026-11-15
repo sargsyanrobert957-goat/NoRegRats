@@ -147,7 +147,7 @@ namespace NoRegRats
 
             // The origin is at the feet, like the sprite's pivot.
             var collider = root.AddComponent<CapsuleCollider2D>();
-            collider.size = new Vector2(0.65f, 1.55f);
+            collider.size = new Vector2(0.8f, 1.55f);
             collider.offset = new Vector2(0f, 0.775f);
             collider.sharedMaterial = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>(NoFrictionPath);
 

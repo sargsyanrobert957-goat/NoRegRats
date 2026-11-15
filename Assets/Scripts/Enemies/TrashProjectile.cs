@@ -3,10 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The Rat King's thrown trash: launched on an arc that lands on its target, spinning. It flies
-    /// through platforms (so the arena's bars aren't a permanent shield) and only hits the hero; if
-    /// it misses, it disappears once it falls just below where the hero stood, about floor level.
-    /// Needs a trigger collider and a Dynamic Rigidbody2D (its gravity scale shapes the arc).
+    /// The Rat King's thrown trash: it flies in an arc to the hero's position, passes through platforms
+    /// and only hurts the hero. It disappears when it falls below floor level.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class TrashProjectile : MonoBehaviour

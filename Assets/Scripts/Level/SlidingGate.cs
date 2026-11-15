@@ -4,9 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// A gate of bars that slides between closed (where it's placed in the scene, solid) and open
-    /// (moved by Open Offset, usually up into a wall or ceiling, not solid). Used for the arena's
-    /// entrance gate and its exit grate. Draw it behind the ground so it hides when open.
+    /// A gate that slides between closed (solid, where it is placed) and open (moved by Open Offset,
+    /// not solid). Used for the arena entrance and exit.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class SlidingGate : MonoBehaviour

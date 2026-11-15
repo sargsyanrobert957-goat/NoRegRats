@@ -4,10 +4,8 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// The controls sheet in the corner of the screen when play first starts (once per launch, not
-    /// after deaths or restarts), so the keys are seen right away without stopping the game. It
-    /// waits while a menu is open, then fades out once the hero has both run and jumped, or after
-    /// a while at the most. The same sheet stays in the pause menu.
+    /// Shows the controls sheet in the corner when play first starts. It fades out once the hero has
+    /// run and jumped, or after a set time.
     /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public class ControlsHint : MonoBehaviour

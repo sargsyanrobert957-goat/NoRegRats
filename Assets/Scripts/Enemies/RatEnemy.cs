@@ -4,11 +4,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// A rat that patrols back and forth, turning at walls, ledges and the end of its patrol range.
-    /// When shot it is knocked back and stunned for a moment; at 0 HP it shrinks away in a poof and
-    /// deactivates. The single drawn frame is brought to life with a waddle (bob and tilt). Rats pass
-    /// through the hero; ContactDamage on the same object does the biting. Different rat types are
-    /// the same prefab setup with different Health, ContactDamage and speed values.
+    /// A patrolling rat that turns at walls, ledges and the end of its range. A hit knocks it back and
+    /// stuns it; at 0 HP it shrinks away. ContactDamage does the biting. Rat types are prefab
+    /// variations of Health, damage and speed.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
     public class RatEnemy : MonoBehaviour

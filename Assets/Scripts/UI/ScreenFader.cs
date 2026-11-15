@@ -6,8 +6,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// Fades the screen to black, reloads the current level and fades back in. Creates its own
-    /// full-screen overlay the first time it's used and keeps it across scene loads.
+    /// Fades to black, reloads the level and fades back in. Builds its own overlay on first use and
+    /// persists across scenes.
     /// </summary>
     public class ScreenFader : MonoBehaviour
     {
