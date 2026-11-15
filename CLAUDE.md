@@ -21,7 +21,7 @@ Samvel Sardaryan.
 ## Current status: HW5 Digital Prototype (due Sunday 1 November 2026)
 
 The prototype is playable from start to finish in `Assets/Scenes/Level1.unity`: title screen →
-street → drop into the subway station → drop into the sewers → Rat King fight → escape (the Heart is optional) →
+street → drop into the subway station → drop into the sewers → Rat King fight → take the Heart →
 escape → You Won. Losing all 3 lives shows You Lost.
 
 Done: hero art and animation, movement (run, jump, crouch, push), bare-handed punching, health,
@@ -256,7 +256,7 @@ assigned in Level1 and MovementTest. To swap or add a sound:
 - Boss fight (`Level/Arena/Boss Arena`, `BossArena`): its trigger covers the arena floor past the
   entrance. On entry the `Entrance Gate` drops (`SlidingGate.Close`), the camera locks on
   `Camera Spot`, the `Rat King` starts and `HUD`'s `BossHealthBar` shows. Beating him drops the
-  Heart (optional) and opens the `Exit Grate` and unlocks the camera right away;
+  Heart; taking it (`HeartPickup.Collected`) opens the `Exit Grate` and unlocks the camera;
   walking out through `LevelExit` calls `GameSession.Win()` (raises `GameSession.GameWon`) and
   stops the controls. After a death with the Heart already taken, the King stays gone and the
   exit starts open.
@@ -313,8 +313,8 @@ assigned in Level1 and MovementTest. To swap or add a sound:
   with `InputSystemUIInputModule` (project-wide UI actions) drives the buttons. The HUD has no
   `GraphicRaycaster` in the scene, so `TitleMenu` adds one at runtime; without it the mouse can't
   reach any menu. Test menus with real clicks, not by calling `onClick` from code.
-- Goal steps: "Get to the sewers" (start) → "Find the Rat King" (`Sewers Goal` trigger) →
-  "Defeat the Rat King" → "Escape through the grate!" (set by `BossArena`).
+- Goal steps (no goal text at the start): "Find the Rat King" (`Sewers Goal` trigger) →
+  "Defeat the Rat King" → "Take the Heart" → "Escape through the grate!" (set by `BossArena`).
 - Lines: the start's `Joke Sign Line` (`SpeechTrigger` on the SUBWAY sign) and the Rat King's
   fight-start and defeat lines (`BossArena`). All are editable text fields in the Inspector.
 - The menus are the team's drawings (built by `MenuSetup`), placed as in the artist's mockups.
