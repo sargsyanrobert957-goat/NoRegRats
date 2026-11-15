@@ -33,6 +33,7 @@ namespace NoRegRats
         const float PauseWindowScale = 0.55f;
         const float PauseWindowGap = 40f;
         const float ControlsInWindow = 0.85f;
+        const float ControlsHintScale = 0.25f;
 
         static readonly Color TitleBackground = new Color32(187, 187, 187, 255);
         static readonly Color Dim = new Color(0.17f, 0.17f, 0.2f, 0.6f);
@@ -57,6 +58,8 @@ namespace NoRegRats
             }
             BuildLives(hud);
             BuildPauseButton(hud);
+            BuildControlsHint(hud);
+            FitControlsSheet(hud);
             AddClickSound();
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -121,6 +124,33 @@ namespace NoRegRats
             // With the HUD, under the menus.
             rect.SetSiblingIndex(hud.Find("Hearts").GetSiblingIndex() + 1);
             SetObject(Get<PauseMenu>(hud), "pauseButton", button);
+        }
+
+        /// <summary>
+        /// The controls sheet in a small window in the bottom-left corner, shown when play first
+        /// starts and faded out by ControlsHint once the keys have been used.
+        /// </summary>
+        internal static void BuildControlsHint(Transform hud)
+        {
+            if (hud.Find("Controls Hint") != null)
+                return;
+            Vector2 size = Window * ControlsHintScale;
+            RectTransform card = Rect("Controls Hint", hud, Vector2.zero, new Vector2(30f, 30f) + size * 0.5f, size, new Vector2(0.5f, 0.5f));
+            card.gameObject.AddComponent<CanvasGroup>();
+            Picture(Rect("Back", card, new Vector2(0.5f, 0.5f), Vector2.zero, size, new Vector2(0.5f, 0.5f)), Art("Window"));
+            Sprite keys = Art("Controls");
+            Picture(Rect("Keys", card, new Vector2(0.5f, 0.5f), Vector2.zero, keys.rect.size * ControlsHintScale * ControlsInWindow, new Vector2(0.5f, 0.5f)), keys);
+            card.gameObject.AddComponent<ControlsHint>();
+            // With the HUD, under the menus.
+            card.SetSiblingIndex(hud.Find("Hearts").GetSiblingIndex() + 1);
+        }
+
+        // Keeps the pause screen's copy of the controls sheet sized to the drawing, which grew a line.
+        static void FitControlsSheet(Transform hud)
+        {
+            var keys = (RectTransform)hud.Find("Pause Menu/Controls/Keys");
+            if (keys != null)
+                keys.sizeDelta = Art("Controls").rect.size * PauseWindowScale * ControlsInWindow;
         }
 
         // --- Screens ---
