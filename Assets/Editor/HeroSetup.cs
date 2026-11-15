@@ -6,7 +6,7 @@ namespace NoRegRats
     /// <summary>
     /// Puts the drawn hero on the Player prefab: sets the hero frames' import settings (feet pivot,
     /// size, 512 px cap), clears whatever was on the "Visual" child before, and gives it a
-    /// SpriteRenderer and a HeroAnimator wired to the frames. Safe to run again, e.g. after
+    /// SpriteRenderer and a HeroAnimator wired to the frames (idle, run, punch, hurt). Safe to run again, e.g. after
     /// replacing the frames with new drawings of the same names.
     /// </summary>
     public static class HeroSetup
@@ -21,6 +21,10 @@ namespace NoRegRats
         // All run frames share one pivot so the artist's up-and-down bounce is kept.
         static readonly Vector2 RunPivot = new Vector2(0.5f, 0.011f);
         static readonly Vector2 IdlePivot = new Vector2(0.49f, 0.032f);
+        // The punch and hurt drawings share one canvas; their pivots put the hips where the idle
+        // frame has them, so switching poses doesn't shift the hero sideways.
+        static readonly Vector2 PunchPivot = new Vector2(0.455f, 0.09f);
+        static readonly Vector2 HurtPivot = new Vector2(0.415f, 0.089f);
 
         [MenuItem("Tools/NoRegRats/Set Up Hero Sprite")]
         public static void Run()
@@ -29,7 +33,10 @@ namespace NoRegRats
             var runFrames = new Sprite[RunFrameCount];
             for (int i = 0; i < RunFrameCount; i++)
                 runFrames[i] = ConfigureSprite($"{HeroFolder}Hero_Run_{i + 1}.png", RunPivot);
-            if (idle == null || System.Array.IndexOf(runFrames, null) >= 0)
+            Sprite punchGuard = ConfigureSprite(HeroFolder + "Hero_Punch_1.png", PunchPivot);
+            Sprite punchOut = ConfigureSprite(HeroFolder + "Hero_Punch_2.png", PunchPivot);
+            Sprite hurt = ConfigureSprite(HeroFolder + "Hero_Hurt.png", HurtPivot);
+            if (idle == null || System.Array.IndexOf(runFrames, null) >= 0 || punchGuard == null || punchOut == null || hurt == null)
             {
                 Debug.LogError("HeroSetup: some hero frames are missing from " + HeroFolder);
                 return;
@@ -75,6 +82,10 @@ namespace NoRegRats
                 frames.arraySize = runFrames.Length;
                 for (int i = 0; i < runFrames.Length; i++)
                     frames.GetArrayElementAtIndex(i).objectReferenceValue = runFrames[i];
+                serialized.FindProperty("punchGuardFrame").objectReferenceValue = punchGuard;
+                serialized.FindProperty("punchOutFrame").objectReferenceValue = punchOut;
+                serialized.FindProperty("hurtFrame").objectReferenceValue = hurt;
+                serialized.FindProperty("health").objectReferenceValue = root.GetComponent<Health>();
                 serialized.ApplyModifiedPropertiesWithoutUndo();
 
                 PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);

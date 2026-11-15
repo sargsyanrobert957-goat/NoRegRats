@@ -106,6 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.HeroAnimator
   movement: {fileID: 4572145336697817371}
+  health: {fileID: 7872510935903773563}
   idleFrame: {fileID: 21300000, guid: 9e8237cf3cfed244c99f54cc29d8b834, type: 3}
   runFrames:
   - {fileID: 21300000, guid: edc435e14d6495e4d9a86f291ab5a263, type: 3}
@@ -129,9 +130,12 @@ MonoBehaviour:
   scaleSpring: 14
   pushLean: 6
   leanSpeed: 60
-  punchLunge: 0.22
-  lungeRecovery: 12
-  punchScale: {x: 1.15, y: 0.93}
+  punchGuardFrame: {fileID: 21300000, guid: 011f377d1b7fef449a5c006e858554ba, type: 3}
+  punchOutFrame: {fileID: 21300000, guid: 24e42b301be5571478f258fbce90107b, type: 3}
+  punchGuardTime: 0.05
+  punchOutTime: 0.1
+  hurtFrame: {fileID: 21300000, guid: d7d8042b5be50be43850223d9ab206cc, type: 3}
+  hurtTime: 0.35
 --- !u!1 &4010168851994285444
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,6 +350,7 @@ MonoBehaviour:
   reach: 0.9
   height: 1.1
   fistHeight: 0.75
+  drawnFist: {x: 0.36, y: 1.05}
   hitShake: 0.06
   puffColor: {r: 0.95, g: 0.94, b: 0.9, a: 0.95}
   heroAnimator: {fileID: 6558260859440955381}

@@ -7,7 +7,8 @@ namespace NoRegRats
     /// stretch: the run cycle plays in step with ground speed, the standing frame breathes, the air
     /// uses one run frame stretched while rising and squashed while falling, take-off and landing
     /// get a quick squash/stretch that springs back, crouching squashes the figure and pushing leans
-    /// it forward, and a punch lunges it forward with a quick stretch. Faces the player's
+    /// it forward. Punching plays the drawn punch (guard, arm out, guard), and getting hurt shows
+    /// the drawn hurt pose for a moment (and stays on it while dead). Faces the player's
     /// FacingDirection by mirroring this object.
     /// Put it on the "Visual" child, positioned at the bottom of the player's collider, with sprites
     /// whose pivot is at the feet so all scaling keeps the feet planted.
@@ -16,6 +17,8 @@ namespace NoRegRats
     public class HeroAnimator : MonoBehaviour
     {
         [SerializeField] PlayerMovement movement;
+        [Tooltip("The hero's Health, for the hurt pose. Found on the parent if empty.")]
+        [SerializeField] Health health;
 
         [Header("Frames")]
         [SerializeField] Sprite idleFrame;
@@ -53,16 +56,25 @@ namespace NoRegRats
         [SerializeField] float leanSpeed = 60f;
 
         [Header("Punching")]
-        [Tooltip("How far the figure lunges forward on each punch, in world units.")]
-        [SerializeField] float punchLunge = 0.22f;
-        [Tooltip("How quickly the figure returns after a lunge. Higher is snappier.")]
-        [SerializeField] float lungeRecovery = 12f;
-        [Tooltip("Scale snapped to on each punch, then eased back: stretched toward the fist.")]
-        [SerializeField] Vector2 punchScale = new Vector2(1.15f, 0.93f);
+        [Tooltip("The guard frame (fists up).")]
+        [SerializeField] Sprite punchGuardFrame;
+        [Tooltip("The frame with the arm out.")]
+        [SerializeField] Sprite punchOutFrame;
+        [Tooltip("Seconds the guard shows before and after the arm is out (the artist's animation: guard, out, out, guard at 0.05 s each).")]
+        [SerializeField] float punchGuardTime = 0.05f;
+        [Tooltip("Seconds the arm stays out.")]
+        [SerializeField] float punchOutTime = 0.1f;
+
+        [Header("Hurt")]
+        [Tooltip("Shown when the hero is hit, and while dead.")]
+        [SerializeField] Sprite hurtFrame;
+        [Tooltip("Seconds the hurt pose shows after a hit (the knockback lasts 0.25).")]
+        [SerializeField] float hurtTime = 0.35f;
 
         SpriteRenderer spriteRenderer;
         Vector3 basePosition;
-        float lunge;
+        float punchTime = -1f;
+        float hurtLeft;
         Vector2 scale = Vector2.one;
         float runPhase;
         float lean;
@@ -74,13 +86,40 @@ namespace NoRegRats
             basePosition = transform.localPosition;
             if (movement == null)
                 movement = GetComponentInParent<PlayerMovement>();
+            if (health == null)
+                health = GetComponentInParent<Health>();
         }
 
-        /// <summary>Lunges the figure forward with a quick stretch, for a punch.</summary>
-        public void Punch()
+        void OnEnable()
         {
-            lunge = punchLunge;
-            scale = punchScale;
+            if (health != null)
+                health.Damaged += OnDamaged;
+        }
+
+        void OnDisable()
+        {
+            if (health != null)
+                health.Damaged -= OnDamaged;
+        }
+
+        void OnDamaged(int amount, Vector2 source) => hurtLeft = hurtTime;
+
+        /// <summary>Plays the punch from the start.</summary>
+        public void Punch() => punchTime = 0f;
+
+        // The punch frame for this moment, or null once the punch is over.
+        Sprite PunchFrame()
+        {
+            if (punchTime < 0f)
+                return null;
+            if (punchTime < punchGuardTime)
+                return punchGuardFrame;
+            if (punchTime < punchGuardTime + punchOutTime)
+                return punchOutFrame;
+            if (punchTime < punchGuardTime * 2f + punchOutTime)
+                return punchGuardFrame;
+            punchTime = -1f;
+            return null;
         }
 
         void LateUpdate()
@@ -120,13 +159,23 @@ namespace NoRegRats
             if (movement.IsCrouching)
                 target = Vector2.Scale(target, crouchScale);
 
+            // Drawn poses go over whatever the hero is doing: hurt first, then a punch.
+            hurtLeft -= dt;
+            Sprite punchFrame = PunchFrame();
+            // Advanced after picking the frame, by at most one guard's time, so every drawing of a
+            // punch shows for at least a frame even if the game hitches.
+            if (punchTime >= 0f)
+                punchTime += Mathf.Min(dt, punchGuardTime);
+            if (hurtFrame != null && (hurtLeft > 0f || (health != null && health.IsDead)))
+                spriteRenderer.sprite = hurtFrame;
+            else if (punchFrame != null)
+                spriteRenderer.sprite = punchFrame;
+
             scale = Vector2.Lerp(scale, target, 1f - Mathf.Exp(-scaleSpring * dt));
             lean = Mathf.MoveTowards(lean, movement.IsPushing ? pushLean : 0f, leanSpeed * dt);
 
-            lunge = Mathf.Lerp(lunge, 0f, 1f - Mathf.Exp(-lungeRecovery * dt));
-
             int facing = movement.FacingDirection;
-            transform.localPosition = basePosition + Vector3.right * (lunge * facing);
+            transform.localPosition = basePosition;
             transform.localScale = new Vector3(scale.x * facing, scale.y, 1f);
             transform.localRotation = Quaternion.Euler(0f, 0f, -lean * facing);
         }
