@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace NoRegRats
@@ -9,6 +10,7 @@ namespace NoRegRats
     /// front of the hero, with a cooldown. Every punch lunges the figure forward and puffs at the
     /// fist; a hit also plays the Hit sound and gives a tiny camera shake, a miss plays the Punch
     /// whoosh. Hits use an overlap check, so rats (which pass through the hero) are hit too.
+    /// A mouse click on a HUD button (the pause button) doesn't punch.
     /// </summary>
     [RequireComponent(typeof(PlayerMovement))]
     public class PlayerPunch : MonoBehaviour
@@ -52,9 +54,12 @@ namespace NoRegRats
 
         void Update()
         {
-            if (attackAction.WasPressedThisFrame() && Time.time >= nextPunchTime && !movement.InputLocked)
+            if (attackAction.WasPressedThisFrame() && Time.time >= nextPunchTime && !movement.InputLocked && !ClickedOnUi())
                 Punch();
         }
+
+        bool ClickedOnUi() =>
+            attackAction.activeControl?.device is Mouse && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
         void Punch()
         {

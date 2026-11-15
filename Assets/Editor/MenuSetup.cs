@@ -10,8 +10,9 @@ namespace NoRegRats
     /// (Start, Continue, Exit and the hero leaning in from the right), the pause screen (Continue,
     /// Restart, Quit) with the controls sheet beside it, You Won (with the run's stats written next
     /// to the drawn labels, Play Again, Quit) and You Lost (Restart, Quit). Also adds the lives
-    /// counter under the hearts and the Click sound to the scene's sound list. Replaces the old
-    /// plain menus; does nothing if the drawn ones are already there.
+    /// counter under the hearts, the pause button in the top-right corner and the Click sound to
+    /// the scene's sound list. Replaces the old plain menus if the drawn ones aren't there yet;
+    /// adds each of the other pieces only if it's missing.
     ///
     /// Every drawing sits where it does in the artist's mockups: positions below are each PNG's
     /// top-left corner in pixels on its mockup (the 2160 x 1620 title board, or the 1613 x 1456
@@ -46,18 +47,16 @@ namespace NoRegRats
         {
             var scene = EditorSceneManager.OpenScene(ScenePath);
             Transform hud = GameObject.Find("HUD").transform;
-            if (hud.Find("Lose Screen") != null)
+            if (hud.Find("Lose Screen") == null)
             {
-                Debug.Log("MenuSetup: the drawn menus are already set up.");
-                return;
+                foreach (string old in new[] { "Title Menu", "Pause Menu", "Win Screen" })
+                    for (Transform menu = hud.Find(old); menu != null; menu = hud.Find(old))
+                        Object.DestroyImmediate(menu.gameObject);
+                var playerHealth = Object.FindAnyObjectByType<PlayerMovement>().GetComponent<Health>();
+                Build(hud, playerHealth);
             }
-            foreach (string old in new[] { "Title Menu", "Pause Menu", "Win Screen" })
-                for (Transform menu = hud.Find(old); menu != null; menu = hud.Find(old))
-                    Object.DestroyImmediate(menu.gameObject);
-
-            var playerHealth = Object.FindAnyObjectByType<PlayerMovement>().GetComponent<Health>();
-            Build(hud, playerHealth);
             BuildLives(hud);
+            BuildPauseButton(hud);
             AddClickSound();
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -96,6 +95,32 @@ namespace NoRegRats
             Transform popup = hud.Find("Hearts/Bonus Popup");
             if (popup != null)
                 ((RectTransform)popup).anchoredPosition = new Vector2(0f, -135f);
+        }
+
+        /// <summary>A drawn pause button in the top-right corner, opening the pause menu during play.</summary>
+        internal static void BuildPauseButton(Transform hud)
+        {
+            if (hud.Find("Pause Button") != null)
+                return;
+            Sprite sprite = Art("PauseButton");
+            // 40 px in from the right and 25 down, placed by its centre so it grows and tilts about its middle.
+            RectTransform rect = Rect("Pause Button", hud, new Vector2(1f, 1f), new Vector2(-95f, -80f), new Vector2(110f, 110f), new Vector2(0.5f, 0.5f));
+            Image image = Picture(rect, sprite);
+            image.raycastTarget = true;
+            var button = rect.gameObject.AddComponent<Button>();
+            ColorBlock colors = button.colors;
+            colors.highlightedColor = colors.selectedColor = new Color(1f, 0.95f, 0.78f);
+            colors.pressedColor = new Color(0.9f, 0.84f, 0.68f);
+            button.colors = colors;
+            // Never selected, so Space (attack, and the UI's submit) can't press it during play.
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            var feedback = rect.gameObject.AddComponent<MenuButtonFeedback>();
+            var serialized = new SerializedObject(feedback);
+            serialized.FindProperty("selectOnHover").boolValue = false;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            // With the HUD, under the menus.
+            rect.SetSiblingIndex(hud.Find("Hearts").GetSiblingIndex() + 1);
+            SetObject(Get<PauseMenu>(hud), "pauseButton", button);
         }
 
         // --- Screens ---
