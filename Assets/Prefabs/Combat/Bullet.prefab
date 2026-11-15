@@ -172,5 +172,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.EnemyBullet
   speed: 9
   range: 16
-  damage: 1
+  damage: 2
   spin: 720
