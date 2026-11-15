@@ -4,10 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The hero's reaction to their Health: knocked away from whatever hurt them, and on death the
-    /// controls stop and a life is lost. With lives left the level fades out and restarts (every rat
-    /// and the Rat King come back); with none left the run is lost (GameSession.Lose, which shows
-    /// the You Lost screen). If the Heart was already taken, the hero restarts with the extra heart.
+    /// The hero's reaction to damage: knockback, and on death a life is lost. With lives left the level
+    /// restarts; with none the run is lost. A taken Heart is kept after dying.
     /// </summary>
     [RequireComponent(typeof(Health), typeof(PlayerMovement))]
     public class PlayerHealth : MonoBehaviour

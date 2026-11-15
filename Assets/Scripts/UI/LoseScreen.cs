@@ -6,8 +6,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// "You lost the game =(" shown when the hero dies with no lives left. Restart starts a fresh
-    /// run (all progress is lost); Quit goes back to the title.
+    /// The "You lost" screen, shown when the hero dies with no lives left. Restart begins a fresh run;
+    /// Quit returns to the title.
     /// </summary>
     public class LoseScreen : MonoBehaviour
     {

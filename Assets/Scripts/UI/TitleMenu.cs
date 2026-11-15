@@ -5,11 +5,9 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// The title screen over the level: Start, Continue and Exit. The game is frozen behind it.
-    /// It shows when the game launches, when Quit is picked on the pause screen (then Continue goes
-    /// back into that run), and after Quit on the You Won / You Lost screens (the level is reloaded
-    /// first, so a fresh level waits behind it). Continue is greyed out when there's no run to go
-    /// back to. Start begins a fresh run; Exit closes the game. Dying or restarting skips it.
+    /// The title screen: Start, Continue and Exit. It shows on launch and after Quit from the pause,
+    /// win or lose screens, with the game frozen behind it. Continue is greyed out when there is no run
+    /// to return to.
     /// </summary>
     public class TitleMenu : MonoBehaviour
     {

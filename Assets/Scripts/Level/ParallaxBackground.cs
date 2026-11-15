@@ -4,13 +4,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The graph-paper backdrop: a tiled sprite that drifts slower than the level as the camera
-    /// moves (parallax) and takes its tint from how deep the camera is, so the subway and the
-    /// sewers feel different. Make the sprite big enough to cover the view across the whole level.
-    /// Above ground a plain sky and a drawn city cover the paper, so it only shows underground. The
-    /// city is split into layers that drift at different speeds, the nearest fastest. They're made
-    /// here from sprites in a Resources folder and need nothing in the scene; without those sprites
-    /// the paper shows everywhere.
+    /// The graph-paper backdrop and the city skyline above ground. Layers drift slower than the camera
+    /// (the nearest fastest) and the paper's tint follows the camera's depth. The skyline is built from
+    /// sprites in a Resources folder.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class ParallaxBackground : MonoBehaviour

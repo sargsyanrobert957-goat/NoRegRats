@@ -3,9 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The feel of the hero's movement: dust and a sound on take-off, a dust burst and sound on
-    /// landing (bigger, with a camera shake, after a long fall), a skid puff when turning around on
-    /// the ground, and a small puff and footstep every stride while running.
+    /// Movement feel: dust and sound on take-off and landing (with a small camera shake), skid puffs
+    /// when turning, and footsteps while running.
     /// </summary>
     [RequireComponent(typeof(PlayerMovement))]
     public class HeroEffects : MonoBehaviour

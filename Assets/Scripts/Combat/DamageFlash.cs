@@ -3,8 +3,7 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Feedback for getting hit: tints the sprite for a moment, and optionally blinks it for as long
-    /// as the Health stays invulnerable afterwards (used on the hero, who also blinks once dead).
+    /// Tints the sprite when hit, and blinks it while the Health is invulnerable (used on the hero).
     /// </summary>
     [RequireComponent(typeof(Health))]
     public class DamageFlash : MonoBehaviour

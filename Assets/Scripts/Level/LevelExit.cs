@@ -3,8 +3,7 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The way out past the arena's exit grate. Walking into its trigger wins the game: the run is
-    /// marked won (the win screen reacts to that) and the hero's controls stop.
+    /// The exit past the arena grate. Entering its trigger wins the game and stops the hero's controls.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class LevelExit : MonoBehaviour

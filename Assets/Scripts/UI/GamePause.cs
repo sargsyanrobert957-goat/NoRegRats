@@ -4,9 +4,8 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// Freezes the game behind a menu (title, pause, win): stops time and switches off the hero's
-    /// controls (the Player action map) so key presses meant for the menu don't move or shoot.
-    /// The UI action map stays on, so menus and the Pause key keep working.
+    /// Freezes the game behind a menu: stops time and switches off the hero's controls while the UI
+    /// controls stay on.
     /// </summary>
     public static class GamePause
     {

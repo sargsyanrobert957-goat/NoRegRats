@@ -3,9 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// A box the player can push by walking into it on the ground. PlayerMovement detects it and
-    /// moves it along at <see cref="PushSpeed"/>; once the player lets go, ground friction stops it,
-    /// and pushed off a ledge it simply falls. Boxes stacked on top ride along on friction.
+    /// A box the hero pushes by walking into it. PlayerMovement moves it at a fixed speed while pushed;
+    /// otherwise friction stops it, and it falls off ledges.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class PushableBox : MonoBehaviour

@@ -4,11 +4,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The gun rat (Rat2). It stands still and turns to face the hero. When the hero is in range,
-    /// at about its own height and not behind a wall, it raises its gun (a short warning), fires a
-    /// bullet straight along the floor and recoils; then it waits before the next shot. A punch
-    /// interrupts the shot and staggers it. At 0 HP it shrinks away in a poof. The hero can jump
-    /// the bullet. Bites on contact through ContactDamage.
+    /// The gun rat (Rat2). It stands still and faces the hero; in range, at its own height and with a
+    /// clear line, it raises its gun (the warning) and fires along the floor, then waits. A punch
+    /// interrupts the shot. It bites on contact through ContactDamage.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
     public class RatShooter : MonoBehaviour

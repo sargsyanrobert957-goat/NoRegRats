@@ -6,10 +6,8 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// Pause (Esc / gamepad Start, the "UI/Pause" action, or the pause button on the HUD): freezes
-    /// the game and shows Continue, Restart (a fresh run) and Quit (back to the title, where
-    /// Continue returns to this run), next to the controls. Pressing Pause again continues.
-    /// Doesn't open over the other menus.
+    /// Pauses the game (Esc, gamepad Start or the HUD button) and shows Continue, Restart and Quit next
+    /// to the controls. It doesn't open over other menus.
     /// </summary>
     public class PauseMenu : MonoBehaviour
     {

@@ -3,8 +3,7 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// The boss's health bar at the top of the screen: hidden until the fight starts, then the fill
-    /// shrinks with every hit. The fill is a RectTransform whose right anchor tracks the health.
+    /// The boss health bar: hidden until the fight starts, then its fill shrinks with his health.
     /// </summary>
     public class BossHealthBar : MonoBehaviour
     {

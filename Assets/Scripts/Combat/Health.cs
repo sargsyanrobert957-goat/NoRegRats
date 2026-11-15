@@ -4,8 +4,7 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Hit points for anything that can be hurt: the hero, rats and the Rat King. Other components
-    /// react through the events (knockback, flashing, dying) instead of Health knowing about them.
+    /// Hit points for the hero, rats and the Rat King. Other components react through its events.
     /// </summary>
     public class Health : MonoBehaviour
     {

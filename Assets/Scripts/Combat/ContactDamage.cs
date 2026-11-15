@@ -3,9 +3,9 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Hurts the hero whenever this object's collider touches theirs (a rat's bite). Uses a distance
-    /// check rather than collision events, so it still works when the two colliders are set to pass
-    /// through each other. The hero's invulnerability after a hit stops it from biting every frame.
+    /// Hurts the hero while this object's collider is within reach of theirs (a rat's bite). Uses a
+    /// distance check so it works with pass-through colliders; the hero's invulnerability limits it to
+    /// one bite at a time.
     /// </summary>
     public class ContactDamage : MonoBehaviour
     {

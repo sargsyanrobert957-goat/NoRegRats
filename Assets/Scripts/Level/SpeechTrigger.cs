@@ -3,8 +3,7 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Makes something in the world say a line (in the SpeechBubble) the first time the hero walks
-    /// into its trigger, e.g. the joke sign at the start.
+    /// Makes something say a line in the SpeechBubble the first time the hero enters its trigger.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class SpeechTrigger : MonoBehaviour

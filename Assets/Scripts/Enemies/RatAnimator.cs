@@ -3,9 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Plays a looping set of drawn frames on a rat (the rat's walk and waddle are still done by
-    /// RatEnemy), and shows a "punched back" frame for a moment when the rat is hit. Used by the
-    /// chain rat (Rat1).
+    /// Loops a set of drawn frames on a rat (RatEnemy still does the walking) and shows a hit frame
+    /// when it is struck. Used by Rat1 and Rat3.
     /// </summary>
     [RequireComponent(typeof(Health))]
     public class RatAnimator : MonoBehaviour

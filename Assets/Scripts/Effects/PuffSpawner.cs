@@ -3,9 +3,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Dust and paper-scrap puffs: small sprites that drift, grow and fade. One spawner per scene
-    /// keeps a fixed pool (the oldest puff is reused when it runs out), so effects never allocate.
-    /// Call the static Spawn / Burst from anywhere; they do nothing in a scene without a spawner.
+    /// Dust and paper-scrap puffs from a fixed pool (the oldest is reused when it runs out), so effects
+    /// never allocate. Spawn and Burst are static.
     /// </summary>
     public class PuffSpawner : MonoBehaviour
     {
