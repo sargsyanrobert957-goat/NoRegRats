@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468839682a2750a46bb02ae754d93c57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.ContactDamage
-  damage: 1
+  damage: 2
   reach: 0.02
   biteCollider: {fileID: 0}
 --- !u!114 &6463916922133440401
