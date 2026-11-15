@@ -12,7 +12,8 @@ namespace NoRegRats
     [RequireComponent(typeof(AudioSource))]
     public class Sfx : MonoBehaviour
     {
-        public enum Sound { Jump, Land, Step, Shoot, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate }
+        // Saved by number in the scenes, so add new sounds at the end. Punch was Shoot.
+        public enum Sound { Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate, Click }
 
         [Serializable]
         struct Entry
@@ -27,7 +28,7 @@ namespace NoRegRats
             new Entry { sound = Sound.Jump, volume = 0.7f },
             new Entry { sound = Sound.Land, volume = 0.6f },
             new Entry { sound = Sound.Step, volume = 0.35f },
-            new Entry { sound = Sound.Shoot, volume = 0.7f },
+            new Entry { sound = Sound.Punch, volume = 0.7f },
             new Entry { sound = Sound.Hit, volume = 0.8f },
             new Entry { sound = Sound.RatPoof, volume = 0.8f },
             new Entry { sound = Sound.Hurt, volume = 0.9f },
@@ -35,6 +36,7 @@ namespace NoRegRats
             new Entry { sound = Sound.KingDefeated, volume = 1f },
             new Entry { sound = Sound.Heart, volume = 1f },
             new Entry { sound = Sound.Gate, volume = 0.8f },
+            new Entry { sound = Sound.Click, volume = 0.6f },
         };
         [Tooltip("Each play is pitched randomly within this range.")]
         [SerializeField] Vector2 pitchRange = new Vector2(0.94f, 1.06f);

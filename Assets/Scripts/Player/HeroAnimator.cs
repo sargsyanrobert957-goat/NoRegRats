@@ -7,7 +7,8 @@ namespace NoRegRats
     /// stretch: the run cycle plays in step with ground speed, the standing frame breathes, the air
     /// uses one run frame stretched while rising and squashed while falling, take-off and landing
     /// get a quick squash/stretch that springs back, crouching squashes the figure and pushing leans
-    /// it forward. Faces the player's FacingDirection by mirroring this object.
+    /// it forward, and a punch lunges it forward with a quick stretch. Faces the player's
+    /// FacingDirection by mirroring this object.
     /// Put it on the "Visual" child, positioned at the bottom of the player's collider, with sprites
     /// whose pivot is at the feet so all scaling keeps the feet planted.
     /// </summary>
@@ -51,15 +52,17 @@ namespace NoRegRats
         [Tooltip("How quickly the lean blends in and out, in degrees per second.")]
         [SerializeField] float leanSpeed = 60f;
 
-        [Header("Shooting")]
-        [Tooltip("How far the figure is nudged backward on each shot, in world units.")]
-        [SerializeField] float recoilDistance = 0.08f;
-        [Tooltip("How quickly the figure returns after a recoil. Higher is snappier.")]
-        [SerializeField] float recoilRecovery = 12f;
+        [Header("Punching")]
+        [Tooltip("How far the figure lunges forward on each punch, in world units.")]
+        [SerializeField] float punchLunge = 0.22f;
+        [Tooltip("How quickly the figure returns after a lunge. Higher is snappier.")]
+        [SerializeField] float lungeRecovery = 12f;
+        [Tooltip("Scale snapped to on each punch, then eased back: stretched toward the fist.")]
+        [SerializeField] Vector2 punchScale = new Vector2(1.15f, 0.93f);
 
         SpriteRenderer spriteRenderer;
         Vector3 basePosition;
-        float recoil;
+        float lunge;
         Vector2 scale = Vector2.one;
         float runPhase;
         float lean;
@@ -73,8 +76,12 @@ namespace NoRegRats
                 movement = GetComponentInParent<PlayerMovement>();
         }
 
-        /// <summary>Nudges the figure backward, e.g. when firing.</summary>
-        public void Recoil() => recoil = recoilDistance;
+        /// <summary>Lunges the figure forward with a quick stretch, for a punch.</summary>
+        public void Punch()
+        {
+            lunge = punchLunge;
+            scale = punchScale;
+        }
 
         void LateUpdate()
         {
@@ -116,10 +123,10 @@ namespace NoRegRats
             scale = Vector2.Lerp(scale, target, 1f - Mathf.Exp(-scaleSpring * dt));
             lean = Mathf.MoveTowards(lean, movement.IsPushing ? pushLean : 0f, leanSpeed * dt);
 
-            recoil = Mathf.Lerp(recoil, 0f, 1f - Mathf.Exp(-recoilRecovery * dt));
+            lunge = Mathf.Lerp(lunge, 0f, 1f - Mathf.Exp(-lungeRecovery * dt));
 
             int facing = movement.FacingDirection;
-            transform.localPosition = basePosition + Vector3.left * (recoil * facing);
+            transform.localPosition = basePosition + Vector3.right * (lunge * facing);
             transform.localScale = new Vector3(scale.x * facing, scale.y, 1f);
             transform.localRotation = Quaternion.Euler(0f, 0f, -lean * facing);
         }

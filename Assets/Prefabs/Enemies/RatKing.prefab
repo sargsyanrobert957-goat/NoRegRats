@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.RatKing
   walkSpeed: 1.2
-  stopDistance: 0.5
+  stopDistance: 1.7
   trashPrefab: {fileID: 4297561892937961419, guid: b9ade97c61051f346b7a8c6b7eb1c8b8, type: 3}
   throwInterval: 2
   windUpTime: 0.4

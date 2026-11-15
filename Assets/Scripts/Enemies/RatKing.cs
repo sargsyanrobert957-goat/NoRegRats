@@ -15,8 +15,8 @@ namespace NoRegRats
     {
         [Header("Walking")]
         [SerializeField] float walkSpeed = 1.2f;
-        [Tooltip("He stops walking when this close to the hero, horizontally.")]
-        [SerializeField] float stopDistance = 0.5f;
+        [Tooltip("He stops walking when this close to the hero, horizontally. Keep it a little over half his width plus half the hero's (about 1.1), so he stops just short of biting and the hero has to step in to punch.")]
+        [SerializeField] float stopDistance = 1.7f;
 
         [Header("Throwing")]
         [SerializeField] TrashProjectile trashPrefab;

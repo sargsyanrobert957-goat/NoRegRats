@@ -6,13 +6,16 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// "You escaped!" with the run's stats (time, deaths, hearts left), shown a moment after the
-    /// hero walks out of the exit. Play Again starts a fresh run; Quit leaves the game.
+    /// "You Won!!!" with the run's stats (time, deaths, hearts left) written next to the drawn
+    /// labels, shown a moment after the hero walks out of the exit. Play Again starts a fresh run;
+    /// Quit goes back to the title.
     /// </summary>
     public class WinScreen : MonoBehaviour
     {
         [SerializeField] GameObject panel;
-        [SerializeField] Text stats;
+        [SerializeField] Text timeValue;
+        [SerializeField] Text deathsValue;
+        [SerializeField] Text heartsValue;
         [SerializeField] Button playAgainButton;
         [SerializeField] Button quitButton;
         [SerializeField] Health playerHealth;
@@ -23,7 +26,7 @@ namespace NoRegRats
         {
             panel.SetActive(false);
             playAgainButton.onClick.AddListener(PlayAgain);
-            quitButton.onClick.AddListener(GamePause.QuitGame);
+            quitButton.onClick.AddListener(TitleMenu.ReturnAfterRun);
         }
 
         void OnEnable() => GameSession.GameWon += OnWon;
@@ -35,9 +38,9 @@ namespace NoRegRats
         {
             yield return new WaitForSecondsRealtime(delay);
             int seconds = Mathf.FloorToInt(GameSession.RunTime);
-            stats.text = $"Time   {seconds / 60}:{seconds % 60:00}\n" +
-                         $"Deaths   {GameSession.Deaths}\n" +
-                         $"Hearts left   {playerHealth.Current} / {playerHealth.Max}";
+            timeValue.text = $"{seconds / 60}:{seconds % 60:00}";
+            deathsValue.text = GameSession.Deaths.ToString();
+            heartsValue.text = $"{playerHealth.Current} / {playerHealth.Max}";
             panel.SetActive(true);
             GamePause.Freeze();
             if (EventSystem.current != null)

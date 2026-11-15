@@ -7,7 +7,8 @@ namespace NoRegRats
     /// A shot that flies straight at a fixed speed, damages the first Health it touches and
     /// disappears on any solid hit or after travelling its range. Needs a trigger collider and a
     /// Dynamic Rigidbody2D with gravity 0 (Dynamic so it also notices walls and platforms).
-    /// Spawned and recycled by a pool, e.g. PlayerShooter's.
+    /// Can be spawned and recycled by a pool. Unused since the hero punches instead of shooting;
+    /// kept with the PaperBall prefab for thrown items later.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class Projectile : MonoBehaviour

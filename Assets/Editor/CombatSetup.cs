@@ -7,7 +7,7 @@ namespace NoRegRats
     /// <summary>
     /// Sets up combat: sizes the rat and paper-ball sprites, creates the PaperBall and rat prefabs
     /// (only if they don't exist yet, so later tweaks are kept), gives the Player prefab its Health,
-    /// DamageFlash, PlayerHealth and PlayerShooter, and puts one rat of each type in MovementTest.
+    /// DamageFlash, PlayerHealth and PlayerPunch, and puts one rat of each type in MovementTest.
     /// Safe to run again.
     /// </summary>
     public static class CombatSetup
@@ -48,8 +48,9 @@ namespace NoRegRats
                 Debug.LogError("CombatSetup: the paper-ball sprite is missing.");
                 return;
             }
-            Projectile ball = AssetDatabase.LoadAssetAtPath<Projectile>(PaperBallPrefabPath) ?? CreatePaperBall(ballSprite);
-            SetUpPlayer(ball);
+            if (AssetDatabase.LoadAssetAtPath<Projectile>(PaperBallPrefabPath) == null)
+                CreatePaperBall(ballSprite);
+            SetUpPlayer();
 
             var scene = EditorSceneManager.OpenScene(ScenePath);
             foreach (RatType type in RatTypes)
@@ -128,7 +129,7 @@ namespace NoRegRats
             return prefab;
         }
 
-        static void SetUpPlayer(Projectile ball)
+        internal static void SetUpPlayer()
         {
             GameObject root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
             try
@@ -150,11 +151,11 @@ namespace NoRegRats
                 }
                 if (!root.TryGetComponent(out PlayerHealth _))
                     root.AddComponent<PlayerHealth>();
-                if (!root.TryGetComponent(out PlayerShooter shooter))
-                    shooter = root.AddComponent<PlayerShooter>();
-                Set(shooter, "projectilePrefab", ball);
-                Set(shooter, "heroAnimator", heroAnimator);
-                Set(shooter, "muzzleOffset", new Vector2(0.45f, -0.15f));
+                // The shooter the hero had before punching, if its script is gone.
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(root);
+                if (!root.TryGetComponent(out PlayerPunch punch))
+                    punch = root.AddComponent<PlayerPunch>();
+                Set(punch, "heroAnimator", heroAnimator);
 
                 PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
             }

@@ -14,8 +14,8 @@ namespace NoRegRats
             if (GameSession.HasWon || other.attachedRigidbody == null || !other.attachedRigidbody.TryGetComponent(out PlayerMovement movement))
                 return;
             movement.enabled = false;
-            if (movement.TryGetComponent(out PlayerShooter shooter))
-                shooter.enabled = false;
+            if (movement.TryGetComponent(out PlayerPunch punch))
+                punch.enabled = false;
             other.attachedRigidbody.linearVelocity = Vector2.zero;
             GameSession.Win();
         }

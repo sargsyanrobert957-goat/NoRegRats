@@ -10,9 +10,9 @@ namespace NoRegRats
 {
     /// <summary>
     /// Builds Level1's UI into its HUD canvas: hearts (top left), goal text (top centre), the
-    /// boss bar moved to the bottom, a speech bubble, and the title, pause and win screens; plus an
-    /// EventSystem for the buttons, a goal trigger where the sewers start, and the joke sign's
-    /// speech trigger. Only adds what isn't there yet. All text uses the first font found in
+    /// boss bar moved to the bottom, a speech bubble, the lives counter and the menus (built by
+    /// MenuSetup); plus an EventSystem for the buttons, a goal trigger where the sewers start, and
+    /// the joke sign's speech trigger. Only adds what isn't there yet. All text uses the first font found in
     /// Assets/Art/Fonts/ (drop the hand-drawn font there), or Unity's built-in one.
     /// </summary>
     public static class HudSetup
@@ -21,13 +21,6 @@ namespace NoRegRats
         const string UiArtFolder = "Assets/Art/UI/";
         const string FontFolder = "Assets/Art/Fonts";
 
-        const string ControlsText =
-            "A / D  or  arrow keys  -  run\n" +
-            "W  or  Up  -  jump (hold to jump higher)\n" +
-            "Space  -  throw a paper ball\n" +
-            "Ctrl  or  C  -  crouch through low gaps\n" +
-            "Walk into a crate  -  push it\n" +
-            "Esc  -  pause";
         const string JokeLine = "NO RATS ALLOWED.\n(The rats can't read.)";
 
         static readonly Color Ink = new Color(0.17f, 0.17f, 0.2f);
@@ -57,9 +50,8 @@ namespace NoRegRats
             BuildHearts(hud, playerHealth, heartFull, heartEmpty);
             GoalText goal = BuildGoal(hud);
             SpeechBubble speech = BuildSpeechBubble(hud, bubbleSprite);
-            BuildTitle(hud);
-            BuildPause(hud);
-            BuildWin(hud, playerHealth);
+            MenuSetup.Build(hud, playerHealth);
+            MenuSetup.BuildLives(hud);
             BuildEventSystem();
             BuildLevelTriggers(goal, speech);
 
@@ -68,10 +60,6 @@ namespace NoRegRats
             serialized.FindProperty("goalText").objectReferenceValue = goal;
             serialized.FindProperty("speechBubble").objectReferenceValue = speech;
             serialized.ApplyModifiedPropertiesWithoutUndo();
-
-            // Draw the menus over everything else on the HUD.
-            foreach (string menu in new[] { "Win Screen", "Pause Menu", "Title Menu" })
-                hud.Find(menu).SetAsLastSibling();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -163,54 +151,6 @@ namespace NoRegRats
             return speech;
         }
 
-        static void BuildTitle(Transform hud)
-        {
-            RectTransform card = Menu("Title Menu", hud, new Vector2(1000f, 700f), out GameObject panel);
-            Column(card,
-                Label("Title", card, "NO REGRATS", 110, Ink, TextAnchor.MiddleCenter, 150f, FontStyle.Bold),
-                Label("Tagline", card, "Make it through the subway and the sewers,\nbeat the Rat King, take his Heart and get out.", 34, Ink, TextAnchor.MiddleCenter, 110f),
-                Label("Controls", card, "A/D run  -  W jump  -  Space shoot  -  Ctrl crouch  -  Esc pause", 28, new Color(Ink.r, Ink.g, Ink.b, 0.75f), TextAnchor.MiddleCenter, 60f));
-            Button play = MenuButton("Play", card, new Vector2(0f, -210f));
-            Button quit = MenuButton("Quit", card, new Vector2(0f, -300f));
-            var menu = hud.gameObject.AddComponent<TitleMenu>();
-            SetObject(menu, "panel", panel);
-            SetObject(menu, "playButton", play);
-            SetObject(menu, "quitButton", quit);
-        }
-
-        static void BuildPause(Transform hud)
-        {
-            RectTransform card = Menu("Pause Menu", hud, new Vector2(1000f, 820f), out GameObject panel);
-            Column(card,
-                Label("Title", card, "PAUSED", 90, Ink, TextAnchor.MiddleCenter, 120f, FontStyle.Bold),
-                Label("Controls", card, ControlsText, 34, Ink, TextAnchor.MiddleCenter, 280f));
-            Button resume = MenuButton("Resume", card, new Vector2(0f, -200f));
-            Button restart = MenuButton("Restart", card, new Vector2(0f, -285f));
-            Button quit = MenuButton("Quit", card, new Vector2(0f, -370f));
-            var menu = hud.gameObject.AddComponent<PauseMenu>();
-            SetObject(menu, "panel", panel);
-            SetObject(menu, "resumeButton", resume);
-            SetObject(menu, "restartButton", restart);
-            SetObject(menu, "quitButton", quit);
-        }
-
-        static void BuildWin(Transform hud, Health playerHealth)
-        {
-            RectTransform card = Menu("Win Screen", hud, new Vector2(1000f, 680f), out GameObject panel);
-            Text stats;
-            Column(card,
-                Label("Title", card, "YOU ESCAPED!", 100, Ink, TextAnchor.MiddleCenter, 140f, FontStyle.Bold),
-                stats = Label("Stats", card, "Time\nDeaths\nHearts left", 44, Ink, TextAnchor.MiddleCenter, 200f));
-            Button again = MenuButton("Play Again", card, new Vector2(0f, -200f));
-            Button quit = MenuButton("Quit", card, new Vector2(0f, -285f));
-            var screen = hud.gameObject.AddComponent<WinScreen>();
-            SetObject(screen, "panel", panel);
-            SetObject(screen, "stats", stats);
-            SetObject(screen, "playAgainButton", again);
-            SetObject(screen, "quitButton", quit);
-            SetObject(screen, "playerHealth", playerHealth);
-        }
-
         static void BuildEventSystem()
         {
             if (Object.FindAnyObjectByType<EventSystem>() != null)
@@ -256,56 +196,6 @@ namespace NoRegRats
         }
 
         // --- UI helpers ---
-
-        // A full-screen dimmed panel with a paper card in the middle; returns the card.
-        static RectTransform Menu(string name, Transform hud, Vector2 cardSize, out GameObject panel)
-        {
-            RectTransform dim = Rect(name, hud, Vector2.zero, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f));
-            dim.anchorMax = Vector2.one;
-            dim.gameObject.AddComponent<Image>().color = new Color(Ink.r, Ink.g, Ink.b, 0.6f);
-            RectTransform card = Rect("Card", dim, new Vector2(0.5f, 0.5f), Vector2.zero, cardSize, new Vector2(0.5f, 0.5f));
-            card.gameObject.AddComponent<Image>().color = Paper;
-            var border = card.gameObject.AddComponent<Outline>();
-            border.effectColor = Ink;
-            border.effectDistance = new Vector2(6f, -6f);
-            panel = dim.gameObject;
-            return card;
-        }
-
-        // Stacks labels from the top of the card, each as tall as its own height.
-        static void Column(RectTransform card, params Text[] labels)
-        {
-            float y = -40f;
-            foreach (Text label in labels)
-            {
-                float height = label.rectTransform.sizeDelta.y;
-                Place(label.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(card.sizeDelta.x - 80f, height), new Vector2(0.5f, 1f));
-                y -= height + 10f;
-            }
-        }
-
-        static Button MenuButton(string text, RectTransform card, Vector2 fromCentre)
-        {
-            RectTransform rect = Rect(text + " Button", card, new Vector2(0.5f, 0.5f), fromCentre, new Vector2(360f, 70f), new Vector2(0.5f, 0.5f));
-            var image = rect.gameObject.AddComponent<Image>();
-            image.color = Color.white;
-            var outline = rect.gameObject.AddComponent<Outline>();
-            outline.effectColor = Ink;
-            outline.effectDistance = new Vector2(4f, -4f);
-            var button = rect.gameObject.AddComponent<Button>();
-            ColorBlock colors = button.colors;
-            colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(1f, 0.93f, 0.6f);
-            colors.selectedColor = new Color(1f, 0.93f, 0.6f);
-            colors.pressedColor = new Color(0.95f, 0.8f, 0.4f);
-            button.colors = colors;
-            Text label = Label("Text", rect, text, 38, Ink, TextAnchor.MiddleCenter);
-            label.fontStyle = FontStyle.Bold;
-            label.rectTransform.anchorMin = Vector2.zero;
-            label.rectTransform.anchorMax = Vector2.one;
-            label.rectTransform.sizeDelta = Vector2.zero;
-            return button;
-        }
 
         static Text Label(string name, Transform parent, string text, int size, Color color, TextAnchor alignment, float height = 60f, FontStyle style = FontStyle.Normal)
         {

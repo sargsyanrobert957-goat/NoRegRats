@@ -5,8 +5,9 @@ namespace NoRegRats
 {
     /// <summary>
     /// The hero's reaction to their Health: knocked away from whatever hurt them, and on death the
-    /// controls stop, the death is counted and the level fades out and restarts (every rat and the
-    /// Rat King come back). If the Heart was already taken, the hero restarts with the extra heart.
+    /// controls stop and a life is lost. With lives left the level fades out and restarts (every rat
+    /// and the Rat King come back); with none left the run is lost (GameSession.Lose, which shows
+    /// the You Lost screen). If the Heart was already taken, the hero restarts with the extra heart.
     /// </summary>
     [RequireComponent(typeof(Health), typeof(PlayerMovement))]
     public class PlayerHealth : MonoBehaviour
@@ -65,16 +66,19 @@ namespace NoRegRats
         void OnDied()
         {
             movement.InputLocked = true;
-            if (TryGetComponent(out PlayerShooter shooter))
-                shooter.enabled = false;
+            if (TryGetComponent(out PlayerPunch punch))
+                punch.enabled = false;
             GameSession.RecordDeath();
-            StartCoroutine(RestartLevel());
+            StartCoroutine(AfterDeath());
         }
 
-        IEnumerator RestartLevel()
+        IEnumerator AfterDeath()
         {
             yield return new WaitForSeconds(restartDelay);
-            ScreenFader.ReloadScene();
+            if (GameSession.Lives > 0)
+                ScreenFader.ReloadScene();
+            else
+                GameSession.Lose();
         }
     }
 }

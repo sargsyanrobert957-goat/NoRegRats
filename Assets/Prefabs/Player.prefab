@@ -129,8 +129,9 @@ MonoBehaviour:
   scaleSpring: 14
   pushLean: 6
   leanSpeed: 60
-  recoilDistance: 0.08
-  recoilRecovery: 12
+  punchLunge: 0.22
+  lungeRecovery: 12
+  punchScale: {x: 1.15, y: 0.93}
 --- !u!1 &4010168851994285444
 GameObject:
   m_ObjectHideFlags: 0
@@ -146,8 +147,8 @@ GameObject:
   - component: {fileID: 7872510935903773563}
   - component: {fileID: 8032652461118875231}
   - component: {fileID: 3329337841967838822}
-  - component: {fileID: 950129925228273478}
   - component: {fileID: 2491368619966341542}
+  - component: {fileID: 121734702440828792}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -312,22 +313,6 @@ MonoBehaviour:
   restartDelay: 1
   heartBonus: 1
   hurtShake: 0.15
---- !u!114 &950129925228273478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4010168851994285444}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c412fc1e845b3b240929030e859eb18c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.PlayerShooter
-  projectilePrefab: {fileID: 5293320385312046784, guid: 5731819a89db54c4e819efbeb7ac0bb4, type: 3}
-  cooldown: 0.35
-  muzzleOffset: {x: 0.45, y: -0.15}
-  heroAnimator: {fileID: 6558260859440955381}
 --- !u!114 &2491368619966341542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,3 +329,23 @@ MonoBehaviour:
   strideLength: 1.5
   hardLandingSpeed: 15
   hardLandingShake: 0.18
+--- !u!114 &121734702440828792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010168851994285444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84c727c8a8fb8534aac463a3e3dc704c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.PlayerPunch
+  damage: 1
+  cooldown: 0.3
+  reach: 0.9
+  height: 1.1
+  fistHeight: 0.75
+  hitShake: 0.06
+  puffColor: {r: 0.95, g: 0.94, b: 0.9, a: 0.95}
+  heroAnimator: {fileID: 6558260859440955381}

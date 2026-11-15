@@ -6,14 +6,14 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// Pause (Esc / gamepad Start, the "UI/Pause" action): freezes the game and shows the controls
-    /// with Resume, Restart (a fresh run) and Quit. Pressing Pause again resumes. Doesn't open over
-    /// the title or win screens.
+    /// Pause (Esc / gamepad Start, the "UI/Pause" action): freezes the game and shows Continue,
+    /// Restart (a fresh run) and Quit (back to the title, where Continue returns to this run), next
+    /// to the controls. Pressing Pause again continues. Doesn't open over the other menus.
     /// </summary>
     public class PauseMenu : MonoBehaviour
     {
         [SerializeField] GameObject panel;
-        [SerializeField] Button resumeButton;
+        [SerializeField] Button continueButton;
         [SerializeField] Button restartButton;
         [SerializeField] Button quitButton;
 
@@ -24,9 +24,9 @@ namespace NoRegRats
         {
             pauseAction = InputSystem.actions.FindAction("UI/Pause", throwIfNotFound: true);
             panel.SetActive(false);
-            resumeButton.onClick.AddListener(Resume);
+            continueButton.onClick.AddListener(Resume);
             restartButton.onClick.AddListener(Restart);
-            quitButton.onClick.AddListener(GamePause.QuitGame);
+            quitButton.onClick.AddListener(QuitToTitle);
         }
 
         void Update()
@@ -45,7 +45,7 @@ namespace NoRegRats
             panel.SetActive(true);
             GamePause.Freeze();
             if (EventSystem.current != null)
-                EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+                EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
         }
 
         void Resume()
@@ -60,6 +60,14 @@ namespace NoRegRats
             Resume();
             GameSession.StartNewRun();
             ScreenFader.ReloadScene();
+        }
+
+        // The game stays frozen under the title.
+        void QuitToTitle()
+        {
+            paused = false;
+            panel.SetActive(false);
+            TitleMenu.ShowOverRun();
         }
     }
 }
