@@ -15,7 +15,10 @@ namespace NoRegRats
         [SerializeField] float strideLength = 1.5f;
         [Tooltip("Falling at least this fast (units per second) makes a hard landing: more dust and a camera shake.")]
         [SerializeField] float hardLandingSpeed = 15f;
-        [SerializeField] float hardLandingShake = 0.18f;
+        [Tooltip("Camera shake after a hard landing, in world units. Kept small; it was 0.18.")]
+        [SerializeField] float landingShake = 0.06f;
+        [Tooltip("Seconds the landing shake lasts.")]
+        [SerializeField] float landingShakeTime = 0.12f;
 
         PlayerMovement movement;
         Collider2D bodyCollider;
@@ -83,7 +86,7 @@ namespace NoRegRats
                 PuffSpawner.Spawn(Feet + Vector2.right * (side * spread), hard ? 1.4f : 0.9f, new Vector2(side * speed, 0.3f), dustColor);
             }
             if (hard)
-                CameraFollow2D.ShakeActive(hardLandingShake, 0.2f);
+                CameraFollow2D.ShakeActive(landingShake, landingShakeTime);
             fallSpeed = 0f;
         }
     }

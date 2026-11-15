@@ -84,6 +84,7 @@ namespace NoRegRats
             runInProgress = canContinue;
             continueButton.interactable = canContinue;
             panel.SetActive(true);
+            Music.PlayMenu();
             GamePause.Freeze();
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(canContinue ? continueButton.gameObject : startButton.gameObject);
@@ -94,15 +95,19 @@ namespace NoRegRats
             panel.SetActive(false);
             GamePause.Unfreeze();
             GameSession.StartNewRun();
-            // Over a run in progress the level has to be put back to its start.
+            // Over a run in progress the level has to be put back to its start (the reload
+            // restarts the music too).
             if (runInProgress)
                 ScreenFader.ReloadScene();
+            else
+                Music.ResumeGame();
         }
 
         void Continue()
         {
             panel.SetActive(false);
             GamePause.Unfreeze();
+            Music.ResumeGame();
         }
     }
 }

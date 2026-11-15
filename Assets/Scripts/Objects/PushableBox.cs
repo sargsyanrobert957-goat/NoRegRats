@@ -13,9 +13,13 @@ namespace NoRegRats
         [Tooltip("How fast the player moves while pushing this box. Use lower values for bigger boxes.")]
         [SerializeField] float pushSpeed = 2.5f;
 
+        [Tooltip("Seconds between repeats of the scrape sound while the box is being pushed.")]
+        [SerializeField] float scrapeInterval = 0.45f;
+
         public float PushSpeed => pushSpeed;
 
         Rigidbody2D body;
+        float nextScrape;
 
         void Reset() => ApplyDefaultBodySettings();
 
@@ -43,6 +47,13 @@ namespace NoRegRats
             Vector2 velocity = body.linearVelocity;
             velocity.x = velocityX;
             body.linearVelocity = velocity;
+
+            // The scrape repeats while the box is being pushed along.
+            if (Mathf.Abs(velocityX) > 0.1f && Time.time >= nextScrape)
+            {
+                nextScrape = Time.time + scrapeInterval;
+                Sfx.Play(Sfx.Sound.Push);
+            }
         }
     }
 }

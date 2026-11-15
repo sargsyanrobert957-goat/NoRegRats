@@ -13,7 +13,8 @@ namespace NoRegRats
     public class Sfx : MonoBehaviour
     {
         // Saved by number in the scenes, so add new sounds at the end. Punch was Shoot.
-        public enum Sound { Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate, Click }
+        // Gunshot is for the shooting rat (Rat2); Push is the scrape while a box or bin is pushed.
+        public enum Sound { Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate, Click, Gunshot, Push }
 
         [Serializable]
         struct Entry
@@ -37,6 +38,8 @@ namespace NoRegRats
             new Entry { sound = Sound.Heart, volume = 1f },
             new Entry { sound = Sound.Gate, volume = 0.8f },
             new Entry { sound = Sound.Click, volume = 0.6f },
+            new Entry { sound = Sound.Gunshot, volume = 0.8f },
+            new Entry { sound = Sound.Push, volume = 0.6f },
         };
         [Tooltip("Each play is pitched randomly within this range.")]
         [SerializeField] Vector2 pitchRange = new Vector2(0.94f, 1.06f);
