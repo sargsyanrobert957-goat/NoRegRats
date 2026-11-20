@@ -29,6 +29,9 @@ namespace NoRegRats
         bool runInProgress;
         InputAction pauseAction;
 
+        /// <summary>The title is up (on launch, or after Quit).</summary>
+        public static bool IsShowing => instance != null && instance.panel.activeSelf;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetOnLaunch()
         {
@@ -130,10 +133,16 @@ namespace NoRegRats
             GameSession.StartNewRun();
             // Over a run in progress the level has to be put back to its start (the reload
             // restarts the music too).
+            // (The lives screen then shows after the reload.)
             if (runInProgress)
+            {
                 ScreenFader.ReloadScene();
+            }
             else
+            {
                 Music.ResumeGame();
+                LivesScreen.ShowNewRun();
+            }
         }
 
         void Continue()

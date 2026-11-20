@@ -10,7 +10,7 @@ namespace NoRegRats
 {
     /// <summary>
     /// Builds Level1's UI into its HUD canvas: hearts (top left), goal text (top centre), the
-    /// boss bar moved to the bottom, a speech bubble, the lives counter, the pause button, the
+    /// boss bar moved to the bottom, a speech bubble, the full-screen lives count, the pause button, the
     /// controls hint and the menus (built by MenuSetup); plus an EventSystem for the buttons, a
     /// goal trigger where the sewers start, and the joke sign's speech trigger. Only adds what isn't there yet. All text uses the first font found in
     /// Assets/Art/Fonts/ (drop the hand-drawn font there), or Unity's built-in one.
@@ -51,9 +51,11 @@ namespace NoRegRats
             GoalText goal = BuildGoal(hud);
             SpeechBubble speech = BuildSpeechBubble(hud, bubbleSprite);
             MenuSetup.Build(hud, playerHealth);
-            MenuSetup.BuildLives(hud);
+            MenuSetup.HeartsOnly(hud);
+            MenuSetup.BuildLivesScreen(hud);
             MenuSetup.BuildPauseButton(hud);
             MenuSetup.BuildControlsHint(hud);
+            MenuSetup.BuildKeyControls(hud);
             BuildEventSystem();
             BuildLevelTriggers(goal, speech);
 

@@ -8,6 +8,9 @@ namespace NoRegRats
     /// <summary>
     /// The hero's punch (K by default): hits everything with a Health in a short box in front, with a
     /// cooldown. Plays the punch drawing, puffs, sounds and a small camera shake on a hit.
+    /// Punches come in combos: after three in a row the third hits harder (more knockback and shake)
+    /// and the hero needs a moment to catch their breath, so mashing can't stun-lock enemies. A pause
+    /// between punches starts the count again. Misses count too.
     /// </summary>
     [RequireComponent(typeof(PlayerMovement))]
     public class PlayerPunch : MonoBehaviour
@@ -31,11 +34,25 @@ namespace NoRegRats
         [Tooltip("Plays the drawn punch on every punch.")]
         [SerializeField] HeroAnimator heroAnimator;
 
+        [Header("Combo")]
+        [Tooltip("Punches in a row before the hero has to catch their breath.")]
+        [SerializeField] int comboLength = 3;
+        [Tooltip("A longer gap than this between punches, in seconds, starts the count again.")]
+        [SerializeField] float comboGap = 0.6f;
+        [Tooltip("Seconds after the last punch of a combo before the hero can punch again.")]
+        [SerializeField] float recoveryTime = 0.7f;
+        [Tooltip("The last punch of a combo knocks what it hits this many times further.")]
+        [SerializeField] float finisherKnockback = 1.8f;
+        [Tooltip("Camera shake when the last punch of a combo lands, in world units.")]
+        [SerializeField] float finisherShake = 0.12f;
+
         PlayerMovement movement;
         Collider2D bodyCollider;
         Health ownHealth;
         InputAction attackAction;
         float nextPunchTime;
+        float lastPunchTime = float.NegativeInfinity;
+        int comboCount;
         readonly List<Collider2D> overlaps = new List<Collider2D>();
         readonly HashSet<Health> struck = new HashSet<Health>();
         ContactFilter2D filter;
@@ -62,7 +79,15 @@ namespace NoRegRats
 
         void Punch()
         {
-            nextPunchTime = Time.time + cooldown;
+            if (Time.time - lastPunchTime > comboGap)
+                comboCount = 0;
+            comboCount++;
+            lastPunchTime = Time.time;
+            bool finisher = comboCount >= comboLength;
+            if (finisher)
+                comboCount = 0;
+            nextPunchTime = Time.time + (finisher ? Mathf.Max(cooldown, recoveryTime) : cooldown);
+
             int direction = movement.FacingDirection;
             Bounds bounds = bodyCollider.bounds;
             float front = direction > 0 ? bounds.max.x : bounds.min.x;
@@ -79,6 +104,10 @@ namespace NoRegRats
                 if (hit.TryGetComponent(out Health health) && health != ownHealth && struck.Add(health))
                 {
                     health.TakeDamage(damage, bounds.center);
+                    // The finisher sends it further than the knockback it just gave itself.
+                    Rigidbody2D target = other.attachedRigidbody;
+                    if (finisher && target != null && target.simulated && !health.IsDead)
+                        target.linearVelocity = new Vector2(target.linearVelocity.x * finisherKnockback, target.linearVelocity.y);
                     // The puff goes where the fist meets the first thing hit.
                     if (struck.Count == 1)
                         impact = other.ClosestPoint(knuckles);
@@ -88,8 +117,8 @@ namespace NoRegRats
             if (struck.Count > 0)
             {
                 Sfx.Play(Sfx.Sound.Hit);
-                CameraFollow2D.ShakeActive(hitShake, 0.1f);
-                PuffSpawner.Burst(impact, 4, 0.6f, 2.5f, puffColor);
+                CameraFollow2D.ShakeActive(finisher ? finisherShake : hitShake, finisher ? 0.15f : 0.1f);
+                PuffSpawner.Burst(impact, finisher ? 7 : 4, finisher ? 0.8f : 0.6f, 2.5f, puffColor);
             }
             else
             {
@@ -97,7 +126,11 @@ namespace NoRegRats
                 PuffSpawner.Spawn(knuckles, 0.35f, new Vector2(direction * 1.5f, 0f), puffColor);
             }
             if (heroAnimator != null)
+            {
                 heroAnimator.Punch();
+                if (finisher)
+                    heroAnimator.CatchBreath(recoveryTime);
+            }
         }
 
         void OnDrawGizmosSelected()

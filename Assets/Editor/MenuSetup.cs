@@ -10,8 +10,9 @@ namespace NoRegRats
     /// (Start, Continue, Controls, Exit and the hero leaning in from the right) with its Controls
     /// screen, the pause screen (Continue, Restart, Quit) with the controls window beside it, You Won
     /// (with the run's stats written next to the drawn labels, Play Again, Quit) and You Lost
-    /// (Restart, Quit). Also adds the lives counter under the hearts, the pause button in the
-    /// top-right corner, the controls hint and the Click sound to the scene's sound list. Replaces
+    /// (Restart, Quit), and the full-screen lives count. Also makes the hearts in the corner bigger
+    /// (and removes the old "Lives: 3" label), and adds the pause button in the top-right corner,
+    /// the controls hint and the Click sound to the scene's sound list. Replaces
     /// the old plain menus if the drawn ones aren't there yet, and the old fixed picture of the
     /// controls with the changeable keys; adds each of the other pieces only if it's missing.
     ///
@@ -60,11 +61,16 @@ namespace NoRegRats
         // Key.png's frame, kept unstretched when a key box widens (left, bottom, right, top).
         static readonly Vector4 KeyFrame = new Vector4(120f, 97f, 116f, 140f);
 
+        // The hearts in the corner, times their first size.
+        const float HeartsScale = 1.6f;
+        // The lives screen, in canvas units (1080 high).
+        const float LivesHeroHeight = 520f;
+        const float LivesNumberHeight = 330f;
+        const float LivesTimesScale = 0.9f;
+
         static readonly Color TitleBackground = new Color32(187, 187, 187, 255);
         static readonly Color Dim = new Color(0.17f, 0.17f, 0.2f, 0.6f);
         static readonly Color Ink = new Color(0.1f, 0.1f, 0.1f);
-        static readonly Color HudInk = new Color(0.17f, 0.17f, 0.2f);
-        static readonly Color Paper = new Color(0.98f, 0.97f, 0.94f);
 
         static Font font;
 
@@ -81,7 +87,8 @@ namespace NoRegRats
                 var playerHealth = Object.FindAnyObjectByType<PlayerMovement>().GetComponent<Health>();
                 Build(hud, playerHealth);
             }
-            BuildLives(hud);
+            HeartsOnly(hud);
+            BuildLivesScreen(hud);
             BuildPauseButton(hud);
             BuildControlsHint(hud);
             BuildKeyControls(hud);
@@ -104,25 +111,80 @@ namespace NoRegRats
                 hud.Find(menu).SetAsLastSibling();
         }
 
-        /// <summary>"Lives: 3" under the hearts; the "+1 heart!" popup moves below it.</summary>
-        internal static void BuildLives(Transform hud)
+        /// <summary>
+        /// Hearts only in the top-left corner, HeartsScale times their old size: the old "Lives: 3"
+        /// label is removed (the lives screen shows the count), and the "+1 heart!" popup sits
+        /// right under the bigger hearts at about its old text size.
+        /// </summary>
+        internal static void HeartsOnly(Transform hud)
         {
-            if (hud.Find("Lives") != null)
-                return;
-            font = FindFont();
-            Text label = Label("Lives", hud, "Lives: 3", 38, HudInk, TextAnchor.MiddleLeft);
-            label.fontStyle = FontStyle.Bold;
-            Place(label.rectTransform, new Vector2(0f, 1f), new Vector2(40f, -112f), new Vector2(400f, 50f), new Vector2(0f, 1f));
-            var outline = label.gameObject.AddComponent<Outline>();
-            outline.effectColor = Paper;
-            outline.effectDistance = new Vector2(2f, -2f);
-            SetObject(label.gameObject.AddComponent<LivesDisplay>(), "label", label);
-            // With the HUD, under the menus.
-            label.transform.SetSiblingIndex(hud.Find("Hearts").GetSiblingIndex() + 1);
-
-            Transform popup = hud.Find("Hearts/Bonus Popup");
+            Transform oldLabel = hud.Find("Lives");
+            if (oldLabel != null)
+                Object.DestroyImmediate(oldLabel.gameObject);
+            Transform hearts = hud.Find("Hearts");
+            hearts.localScale = Vector3.one * HeartsScale;
+            var popup = (RectTransform)hearts.Find("Bonus Popup");
             if (popup != null)
-                ((RectTransform)popup).anchoredPosition = new Vector2(0f, -135f);
+            {
+                popup.anchoredPosition = new Vector2(0f, -85f);
+                popup.localScale = Vector3.one * (1.2f / HeartsScale);
+            }
+        }
+
+        /// <summary>
+        /// The full-screen lives count (LivesScreen): the hero, "×" and the number, drawn from the
+        /// artist's strokes, on the title's grey. Above the HUD and the other screens, under the title.
+        /// </summary>
+        internal static void BuildLivesScreen(Transform hud)
+        {
+            if (hud.Find("Lives Screen") != null)
+                return;
+            GameObject panel = FullScreen("Lives Screen", hud, TitleBackground);
+            panel.AddComponent<CanvasGroup>();
+
+            Sprite heroArt = Art("Lives/Hero");
+            Sprite timesArt = Art("Lives/Times");
+            Sprite strikeArt = Art("Lives/Strike");
+            Sprite[] numbers = { Art("Lives/One"), Art("Lives/Two"), Art("Lives/Three") };
+
+            // Hero, gap, ×, gap, number box: laid out left to right, centred as a group.
+            Vector2 hero = heroArt.rect.size * (LivesHeroHeight / heroArt.rect.height);
+            Vector2 times = timesArt.rect.size * LivesTimesScale;
+            float number = 0f;
+            foreach (Sprite n in numbers)
+                number = Mathf.Max(number, n.rect.width);
+            Vector2 numberBox = new Vector2(number * LivesNumberHeight / numbers[2].rect.height, LivesNumberHeight);
+            float width = hero.x + 70f + times.x + 50f + numberBox.x;
+            float x = -width * 0.5f;
+            Picture(Rect("Hero", panel.transform, new Vector2(0.5f, 0.5f), new Vector2(x + hero.x * 0.5f, 0f), hero, new Vector2(0.5f, 0.5f)), heroArt);
+            x += hero.x + 70f;
+            Image timesImage = Picture(Rect("Times", panel.transform, new Vector2(0.5f, 0.5f), new Vector2(x + times.x * 0.5f, -20f), times, new Vector2(0.5f, 0.5f)), timesArt);
+            timesImage.color = Ink;
+            x += times.x + 50f;
+            Vector2 numberCentre = new Vector2(x + numberBox.x * 0.5f, 0f);
+            Image oldNumber = Picture(Rect("Old Number", panel.transform, new Vector2(0.5f, 0.5f), numberCentre, numberBox, new Vector2(0.5f, 0.5f)), numbers[2]);
+            Image newNumber = Picture(Rect("Number", panel.transform, new Vector2(0.5f, 0.5f), numberCentre, numberBox, new Vector2(0.5f, 0.5f)), numbers[2]);
+            Vector2 strikeSize = strikeArt.rect.size * (LivesNumberHeight * 1.15f / strikeArt.rect.height);
+            Image strike = Picture(Rect("Strike", panel.transform, new Vector2(0.5f, 0.5f), numberCentre, strikeSize, new Vector2(0.5f, 0.5f)), strikeArt);
+            // Drawn on from the top, like a pen stroke.
+            strike.type = Image.Type.Filled;
+            strike.fillMethod = Image.FillMethod.Vertical;
+            strike.fillOrigin = (int)Image.OriginVertical.Top;
+
+            var screen = Get<LivesScreen>(hud);
+            SetObject(screen, "panel", panel);
+            SetObject(screen, "digit", newNumber);
+            SetObject(screen, "oldDigit", oldNumber);
+            SetObject(screen, "strike", strike);
+            var serialized = new SerializedObject(screen);
+            SerializedProperty list = serialized.FindProperty("numbers");
+            list.arraySize = numbers.Length;
+            for (int i = 0; i < numbers.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = numbers[i];
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            Transform title = hud.Find("Title Menu");
+            panel.transform.SetSiblingIndex(title != null ? title.GetSiblingIndex() : hud.childCount - 1);
         }
 
         /// <summary>A drawn pause button in the top-right corner, opening the pause menu during play.</summary>

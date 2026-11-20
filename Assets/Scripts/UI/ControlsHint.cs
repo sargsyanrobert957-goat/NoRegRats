@@ -4,8 +4,9 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// Shows the controls sheet in the corner when play first starts. It fades out once the hero has
-    /// run and jumped, or after a set time.
+    /// Shows the player's keys in the corner when play first starts: it fades in once the game is
+    /// running (after the title and the lives screen), and out once the hero has run and jumped, or
+    /// after a set time.
     /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public class ControlsHint : MonoBehaviour
@@ -26,6 +27,7 @@ namespace NoRegRats
         bool ran;
         bool jumped;
         bool fading;
+        bool fadingIn;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetOnLaunch() => shownThisLaunch = false;
@@ -46,7 +48,8 @@ namespace NoRegRats
                 return;
             }
             shownThisLaunch = true;
-            group.alpha = 1f;
+            // Hidden until play starts, after the title and the lives screen.
+            group.alpha = 0f;
         }
 
         void Update()
@@ -55,6 +58,13 @@ namespace NoRegRats
             if (GamePause.IsFrozen)
                 return;
 
+            if (shownFor == 0f)
+                fadingIn = true;
+            if (fadingIn)
+            {
+                group.alpha = Mathf.MoveTowards(group.alpha, 1f, Time.deltaTime / fadeTime);
+                fadingIn = group.alpha < 1f;
+            }
             shownFor += Time.deltaTime;
             ran |= Mathf.Abs(moveAction.ReadValue<Vector2>().x) > 0.5f;
             jumped |= jumpAction.WasPressedThisFrame();

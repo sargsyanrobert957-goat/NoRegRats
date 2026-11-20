@@ -59,6 +59,14 @@ namespace NoRegRats
         [Tooltip("Seconds the arm stays out.")]
         [SerializeField] float punchOutTime = 0.1f;
 
+        [Header("Catching Breath")]
+        [Tooltip("How far the figure heaves while catching its breath after a combo (0.04 = 4%).")]
+        [SerializeField] float pantAmount = 0.04f;
+        [Tooltip("Pants per second, times 2π.")]
+        [SerializeField] float pantSpeed = 14f;
+        [Tooltip("Scale while catching its breath: a little lower, as if winded.")]
+        [SerializeField] Vector2 windedScale = new Vector2(1.03f, 0.95f);
+
         [Header("Hurt")]
         [Tooltip("Shown when the hero is hit, and while dead.")]
         [SerializeField] Sprite hurtFrame;
@@ -69,6 +77,7 @@ namespace NoRegRats
         Vector3 basePosition;
         float punchTime = -1f;
         float hurtLeft;
+        float breathLeft;
         Vector2 scale = Vector2.one;
         float runPhase;
         float lean;
@@ -100,6 +109,12 @@ namespace NoRegRats
 
         /// <summary>Plays the punch from the start.</summary>
         public void Punch() => punchTime = 0f;
+
+        /// <summary>
+        /// After a combo the hero can't punch for a moment: standing still they hold the guard
+        /// drawing, a little lowered and panting. Running and jumping look as usual.
+        /// </summary>
+        public void CatchBreath(float seconds) => breathLeft = seconds;
 
         // The punch frame for this moment, or null once the punch is over.
         Sprite PunchFrame()
@@ -143,6 +158,13 @@ namespace NoRegRats
                 spriteRenderer.sprite = runFrames[(int)(runPhase * runFrames.Length) % runFrames.Length];
                 target = Vector2.one;
             }
+            else if (breathLeft > 0f && punchGuardFrame != null)
+            {
+                runPhase = 0f;
+                spriteRenderer.sprite = punchGuardFrame;
+                float pant = Mathf.Abs(Mathf.Sin(Time.time * pantSpeed)) * pantAmount;
+                target = new Vector2(windedScale.x - pant * 0.5f, windedScale.y + pant);
+            }
             else
             {
                 runPhase = 0f;
@@ -150,6 +172,7 @@ namespace NoRegRats
                 float breath = Mathf.Sin(Time.time * breathSpeed) * breathAmount;
                 target = new Vector2(1f - breath * 0.5f, 1f + breath);
             }
+            breathLeft -= dt;
             if (movement.IsCrouching)
                 target = Vector2.Scale(target, crouchScale);
 

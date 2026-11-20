@@ -46,6 +46,9 @@ namespace NoRegRats
         Vector3 visualScale;
         Vector2 home;
         int direction;
+        // Where it last turned at a wall or ledge, and which side that was on (0 = not yet).
+        int wallSide;
+        float wallX;
         float stunTimer;
         float waddlePhase;
 
@@ -94,11 +97,37 @@ namespace NoRegRats
             }
             else
             {
-                if (ShouldTurn())
-                    direction = -direction;
-                velocity.x = direction * walkSpeed;
+                velocity.x = Patrol() ? direction * walkSpeed : 0f;
             }
             body.linearVelocity = velocity;
+        }
+
+        // Turns at walls, ledges and the end of the range; false when it should stand still.
+        bool Patrol()
+        {
+            float x = body.position.x;
+            if (Blocked(direction))
+            {
+                // Walled or ledged in on both sides: stand, facing the same way, rather than turn
+                // round every step.
+                if (Blocked(-direction))
+                    return false;
+                wallSide = direction;
+                wallX = x;
+                direction = -direction;
+            }
+            else if (patrolRange > 0f && (x - home.x) * direction >= patrolRange)
+            {
+                // Out of range, but the wall or ledge it last turned at stands between it and home
+                // (knocked off its perch, say): this spot becomes home, or the range and the wall
+                // would turn it back and forth for ever.
+                int homeward = -direction;
+                if (wallSide == homeward && Mathf.Abs(wallX - x) < Mathf.Abs(home.x - x))
+                    home = body.position;
+                else
+                    direction = homeward;
+            }
+            return true;
         }
 
         void LateUpdate()
@@ -115,16 +144,13 @@ namespace NoRegRats
             visual.localScale = new Vector3(Mathf.Abs(visualScale.x) * direction, visualScale.y, visualScale.z);
         }
 
-        bool ShouldTurn()
+        // A wall, crate or other rat right ahead in that direction (the hero doesn't count), or a ledge.
+        bool Blocked(int towards)
         {
-            if (patrolRange > 0f && (body.position.x - home.x) * direction >= patrolRange)
-                return true;
-
-            // A wall, crate or other rat right ahead (the hero doesn't count).
-            int count = body.Cast(new Vector2(direction, 0f), solidFilter, hits, 0.05f);
+            int count = body.Cast(new Vector2(towards, 0f), solidFilter, hits, 0.05f);
             for (int i = 0; i < count; i++)
             {
-                bool facesUs = hits[i].normal.x * direction < -0.5f;
+                bool facesUs = hits[i].normal.x * towards < -0.5f;
                 bool isPlayer = hits[i].rigidbody != null && hits[i].rigidbody.TryGetComponent(out PlayerMovement _);
                 if (facesUs && !isPlayer)
                     return true;
@@ -132,7 +158,7 @@ namespace NoRegRats
 
             // No ground just past the front foot: a ledge.
             Bounds bounds = bodyCollider.bounds;
-            var frontFoot = new Vector2(direction > 0 ? bounds.max.x + 0.05f : bounds.min.x - 0.05f, bounds.min.y + 0.05f);
+            var frontFoot = new Vector2(towards > 0 ? bounds.max.x + 0.05f : bounds.min.x - 0.05f, bounds.min.y + 0.05f);
             return Physics2D.Raycast(frontFoot, Vector2.down, solidFilter, hits, 0.3f) == 0;
         }
 
