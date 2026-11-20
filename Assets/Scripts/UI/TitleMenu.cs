@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace NoRegRats
 {
     /// <summary>
-    /// The title screen: Start, Continue and Exit. It shows on launch and after Quit from the pause,
-    /// win or lose screens, with the game frozen behind it. Continue is greyed out when there is no run
-    /// to return to.
+    /// The title screen: Start, Continue, Controls and Exit. It shows on launch and after Quit from the
+    /// pause, win or lose screens, with the game frozen behind it. Continue is greyed out when there is
+    /// no run to return to. Controls opens the controls screen over it (keys can be changed there);
+    /// Return or the pause key closes it.
     /// </summary>
     public class TitleMenu : MonoBehaviour
     {
@@ -15,12 +17,17 @@ namespace NoRegRats
         [SerializeField] Button startButton;
         [SerializeField] Button continueButton;
         [SerializeField] Button exitButton;
+        [SerializeField] Button controlsButton;
+        [Tooltip("The controls screen opened by Controls.")]
+        [SerializeField] GameObject controlsPanel;
+        [SerializeField] Button returnButton;
 
         static bool shownThisLaunch;
         static bool showAfterReload;
         static TitleMenu instance;
 
         bool runInProgress;
+        InputAction pauseAction;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetOnLaunch()
@@ -54,6 +61,9 @@ namespace NoRegRats
             instance = this;
             if (!TryGetComponent(out GraphicRaycaster _))
                 gameObject.AddComponent<GraphicRaycaster>();
+            pauseAction = InputSystem.actions.FindAction("UI/Pause", throwIfNotFound: true);
+            if (controlsPanel != null)
+                controlsPanel.SetActive(false);
         }
 
         void OnDestroy()
@@ -67,6 +77,11 @@ namespace NoRegRats
             startButton.onClick.AddListener(StartRun);
             continueButton.onClick.AddListener(Continue);
             exitButton.onClick.AddListener(GamePause.QuitGame);
+            if (controlsButton != null)
+            {
+                controlsButton.onClick.AddListener(OpenControls);
+                returnButton.onClick.AddListener(CloseControls);
+            }
             if (shownThisLaunch && !showAfterReload)
             {
                 panel.SetActive(false);
@@ -86,6 +101,26 @@ namespace NoRegRats
             GamePause.Freeze();
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(canContinue ? continueButton.gameObject : startButton.gameObject);
+        }
+
+        void Update()
+        {
+            if (controlsPanel != null && controlsPanel.activeSelf && !KeyBindings.BlocksMenuKeys && pauseAction.WasPressedThisFrame())
+                CloseControls();
+        }
+
+        void OpenControls()
+        {
+            controlsPanel.SetActive(true);
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(returnButton.gameObject);
+        }
+
+        void CloseControls()
+        {
+            controlsPanel.SetActive(false);
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(controlsButton.gameObject);
         }
 
         void StartRun()

@@ -6,8 +6,9 @@ using UnityEngine.UI;
 namespace NoRegRats
 {
     /// <summary>
-    /// Pauses the game (Esc, gamepad Start or the HUD button) and shows Continue, Restart and Quit next
-    /// to the controls. It doesn't open over other menus.
+    /// Pauses the game (the pause key, Esc by default; gamepad Start; or the HUD button) and shows
+    /// Continue, Restart and Quit next to the controls, where keys can be changed. It doesn't open
+    /// over other menus.
     /// </summary>
     public class PauseMenu : MonoBehaviour
     {
@@ -38,7 +39,8 @@ namespace NoRegRats
 
         void Update()
         {
-            if (!pauseAction.WasPressedThisFrame())
+            // While a key is being changed, Esc cancels that instead.
+            if (!pauseAction.WasPressedThisFrame() || KeyBindings.BlocksMenuKeys)
                 return;
             if (paused)
                 Resume();
@@ -51,6 +53,7 @@ namespace NoRegRats
             paused = true;
             panel.SetActive(true);
             GamePause.Freeze();
+            Music.SetPaused(true);
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
         }
@@ -60,7 +63,8 @@ namespace NoRegRats
             paused = false;
             panel.SetActive(false);
             GamePause.Unfreeze();
-            // Nothing stays selected during play, or Space (attack, and the UI's submit) would
+            Music.SetPaused(false);
+            // Nothing stays selected during play, or Space (jump, and the UI's submit) would
             // press the HUD's pause button again.
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(null);
@@ -78,6 +82,8 @@ namespace NoRegRats
         {
             paused = false;
             panel.SetActive(false);
+            // The title plays its own menu music.
+            Music.SetPaused(false);
             TitleMenu.ShowOverRun();
         }
     }

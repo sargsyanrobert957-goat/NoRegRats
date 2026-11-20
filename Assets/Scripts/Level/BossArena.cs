@@ -51,12 +51,17 @@ namespace NoRegRats
         void OnEnable()
         {
             king.Defeated += OnKingDefeated;
+            king.GetComponent<Health>().Died += OnKingDied;
         }
 
         void OnDisable()
         {
             king.Defeated -= OnKingDefeated;
+            king.GetComponent<Health>().Died -= OnKingDied;
         }
+
+        // The boss song cuts out on the final punch, with the King's explosion; the escape is silent.
+        void OnKingDied() => Music.Stop();
 
         void OnTriggerEnter2D(Collider2D other)
         {
@@ -75,7 +80,6 @@ namespace NoRegRats
         void OnKingDefeated()
         {
             healthBar.Hide();
-            Music.PlayLevel();
             exitGrate.Open();
             cameraFollow.Unlock();
             goalText.Show(escapeGoal);

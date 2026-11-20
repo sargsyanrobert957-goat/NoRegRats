@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace NoRegRats
 {
     /// <summary>
-    /// The hero's punch (Space): hits everything with a Health in a short box in front, with a
+    /// The hero's punch (K by default): hits everything with a Health in a short box in front, with a
     /// cooldown. Plays the punch drawing, puffs, sounds and a small camera shake on a hit.
     /// </summary>
     [RequireComponent(typeof(PlayerMovement))]

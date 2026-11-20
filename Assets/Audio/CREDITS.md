@@ -1,6 +1,7 @@
 # Audio credits
 
-Everything here is free to use in the game with no credit required. Credit is given anyway.
+Everything here is free to use in the game with no credit required, except the boss song (see
+"Not free" at the end). Credit is given anyway.
 
 ## Kenney's Sound Pack (CC0) - https://kenney.nl
 
@@ -30,3 +31,13 @@ Everything here is free to use in the game with no credit required. Credit is gi
 | SFX/Gunshot.ogg | Pole Position Production - FN Five-seveN 5.7x28mm (GDC 2016), first shot only |
 
 Clips were trimmed, faded and loudness-normalised, and converted to OGG.
+
+## Not free: coursework only
+
+| File | Source |
+|---|---|
+| Music/Boss_Paranoid.ogg | Black Sabbath - "Paranoid" (custom instrumental, YouTube video HS505SvJHTA). The trailing 3 s of silence cut and the level matched to Boss.ogg. Level1's boss track |
+
+This song is copyrighted and not licensed. It's only for playing the game within the course. Don't
+publish a build, a video or a public copy of the project with it in; set Level1's boss track
+(Audio/Music > Boss Track) back to `Music/Boss.ogg` first.

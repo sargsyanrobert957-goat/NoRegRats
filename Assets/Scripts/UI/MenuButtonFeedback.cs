@@ -6,7 +6,7 @@ namespace NoRegRats
 {
     /// <summary>
     /// Makes a drawn menu button react: it grows and tilts when selected, squashes when pressed and
-    /// plays the Click sound. HUD buttons only react to hover, so Space can't press them.
+    /// plays the Click sound. HUD buttons only react to hover, so Space (also the UI's submit) can't press them.
     /// </summary>
     [RequireComponent(typeof(Button))]
     public class MenuButtonFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler

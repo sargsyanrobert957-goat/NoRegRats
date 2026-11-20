@@ -38,7 +38,7 @@ namespace NoRegRats
         [SerializeField] float jumpBufferTime = 0.12f;
 
         [Header("Crouching")]
-        [Tooltip("Top speed while Crouch is held (Left Ctrl / C).")]
+        [Tooltip("Top speed while Crouch is held (S by default).")]
         [SerializeField] float crouchSpeed = 2f;
         [Tooltip("Collider height while crouching. The bottom of the collider stays where it is.")]
         [SerializeField] float crouchHeight = 1.2f;

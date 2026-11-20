@@ -49,6 +49,8 @@ namespace NoRegRats
         {
             instance = this;
             source = GetComponent<AudioSource>();
+            // Menu clicks still sound while the pause menu holds the music.
+            source.ignoreListenerPause = true;
         }
 
         void OnDestroy()
