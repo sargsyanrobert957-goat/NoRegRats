@@ -29,6 +29,8 @@ namespace NoRegRats
         {
             panel.SetActive(true);
             GamePause.Freeze();
+            // The run is over: the level (or boss) music stops. Restart and the title start their own.
+            Music.Stop();
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(restartButton.gameObject);
         }

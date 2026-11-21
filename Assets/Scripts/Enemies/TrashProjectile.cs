@@ -18,11 +18,28 @@ namespace NoRegRats
         [Tooltip("Spin, in degrees per second.")]
         [SerializeField] float spin = 360f;
 
+        static readonly System.Collections.Generic.List<TrashProjectile> flying = new System.Collections.Generic.List<TrashProjectile>();
+
         Rigidbody2D body;
         float despawnTime;
         float missY;
 
         void Awake() => body = GetComponent<Rigidbody2D>();
+        void OnEnable() => flying.Add(this);
+        void OnDisable() => flying.Remove(this);
+
+        /// <summary>Every piece still in the air puffs away (the Rat King is beaten: nothing he threw can hurt).</summary>
+        public static void PuffAll()
+        {
+            for (int i = flying.Count - 1; i >= 0; i--)
+            {
+                TrashProjectile trash = flying[i];
+                PuffSpawner.Burst(trash.body.position, 5, 0.7f, 2.5f, new Color(0.55f, 0.57f, 0.6f, 0.9f));
+                // Switched off at once (trigger messages still reach a disabled component), destroyed at frame end.
+                trash.gameObject.SetActive(false);
+                Destroy(trash.gameObject);
+            }
+        }
 
         /// <summary>Throws from <paramref name="from"/> so it lands on <paramref name="target"/> after <paramref name="flightTime"/> seconds.</summary>
         public void Launch(Vector2 from, Vector2 target, float flightTime)

@@ -170,6 +170,7 @@ namespace NoRegRats
             bodyCollider.enabled = false;
             body.simulated = false;
             Sfx.Play(Sfx.Sound.KingDefeated);
+            TrashProjectile.PuffAll();
             PuffSpawner.Burst(center, 14, 2.2f, 4f, new Color(0.55f, 0.5f, 0.53f, 0.95f));
             CameraFollow2D.ShakeActive(0.35f, 0.4f);
             StartCoroutine(Defeat());

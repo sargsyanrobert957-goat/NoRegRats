@@ -4,8 +4,8 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// What survives a death or reload: lives left, death count, whether the Heart was taken, and the
-    /// win/lose state and run time.
+    /// What survives a death or reload: lives left, death count, whether the Heart was taken, the last
+    /// checkpoint reached, and the win/lose state and run time.
     /// </summary>
     public static class GameSession
     {
@@ -15,6 +15,8 @@ namespace NoRegRats
         public static int Lives { get; private set; }
         public static int Deaths { get; private set; }
         public static bool HasHeart { get; set; }
+        /// <summary>The furthest checkpoint reached this run (0 = the start); a death respawns there.</summary>
+        public static int Checkpoint { get; set; }
         public static bool HasWon { get; private set; }
         public static bool HasLost { get; private set; }
 
@@ -55,6 +57,7 @@ namespace NoRegRats
             Lives = StartingLives;
             Deaths = 0;
             HasHeart = false;
+            Checkpoint = 0;
             HasWon = false;
             HasLost = false;
             startTime = Time.time;

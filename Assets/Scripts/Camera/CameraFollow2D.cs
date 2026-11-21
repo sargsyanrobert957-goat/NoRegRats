@@ -82,6 +82,22 @@ namespace NoRegRats
 
         public void Unlock() => locked = false;
 
+        /// <summary>Jumps the scene's camera straight to the target, e.g. after respawning at a checkpoint.</summary>
+        public static void SnapActive()
+        {
+            if (active == null || active.target == null)
+                return;
+            float facing = active.movement != null ? active.movement.FacingDirection : 0f;
+            active.lead = facing * active.lookAhead;
+            active.leadVelocity = 0f;
+            active.fallOffset = 0f;
+            active.fallVelocity = 0f;
+            active.velocity = Vector3.zero;
+            Vector2 goal = active.ClampToBounds((Vector2)active.target.position + active.offset + new Vector2(active.lead, 0f));
+            active.followPosition = new Vector3(goal.x, goal.y, active.transform.position.z);
+            active.transform.position = active.followPosition;
+        }
+
         void LateUpdate()
         {
             if (target == null)

@@ -3,14 +3,18 @@ using UnityEngine;
 namespace NoRegRats
 {
     /// <summary>
-    /// Loops a set of drawn frames on a rat (RatEnemy still does the walking) and shows a hit frame
-    /// when it is struck. Used by Rat1 and Rat3.
+    /// Shows a rat's drawings (RatEnemy still does the walking): the standing drawing while it walks
+    /// (RatEnemy waddles it), whatever frame RatFighter asks for during an attack, and a hit frame
+    /// when it is struck. Without a standing drawing it loops its frames instead, as the rats first
+    /// did. Used by Rat1 and Rat3.
     /// </summary>
     [RequireComponent(typeof(Health))]
     public class RatAnimator : MonoBehaviour
     {
         [SerializeField] SpriteRenderer target;
-        [Tooltip("The loop, in order.")]
+        [Tooltip("Shown while walking or standing. Empty: the frames below loop all the time instead.")]
+        [SerializeField] Sprite standingFrame;
+        [Tooltip("The loop used when there is no standing drawing, in order.")]
         [SerializeField] Sprite[] frames;
         [SerializeField] float framesPerSecond = 8f;
         [Tooltip("Shown for a moment after the rat is hit.")]
@@ -18,6 +22,7 @@ namespace NoRegRats
         [SerializeField] float hitTime = 0.3f;
 
         Health health;
+        Sprite attackFrame;
         float hitUntil;
         float offset;
 
@@ -35,19 +40,21 @@ namespace NoRegRats
 
         void OnDamaged(int amount, Vector2 source) => hitUntil = Time.time + hitTime;
 
+        /// <summary>The frame of an attack in progress; null goes back to standing.</summary>
+        public void ShowAttackFrame(Sprite frame) => attackFrame = frame;
+
         void Update()
         {
             if (health.IsDead)
                 return;
             if (Time.time < hitUntil && hitFrame != null)
-            {
                 target.sprite = hitFrame;
-                return;
-            }
-            if (frames == null || frames.Length == 0)
-                return;
-            int index = (int)((Time.time + offset) * framesPerSecond) % frames.Length;
-            target.sprite = frames[index];
+            else if (attackFrame != null)
+                target.sprite = attackFrame;
+            else if (standingFrame != null)
+                target.sprite = standingFrame;
+            else if (frames != null && frames.Length > 0)
+                target.sprite = frames[(int)((Time.time + offset) * framesPerSecond) % frames.Length];
         }
     }
 }

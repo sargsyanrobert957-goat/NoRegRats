@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 6501562958626481000}
   - component: {fileID: 5314725172980848507}
   - component: {fileID: 6152074394634156406}
+  - component: {fileID: 2524317472318197375}
   m_Layer: 0
   m_Name: Rat3
   m_TagString: Untagged
@@ -277,6 +278,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.RatAnimator
   target: {fileID: 8009124842242696916}
+  standingFrame: {fileID: 21300000, guid: b5ee69c16bcc30d44a3ee72f9c0739a6, type: 3}
   frames:
   - {fileID: 21300000, guid: 7d5f5224d0ccded4f8449fa6d900cdb5, type: 3}
   - {fileID: 21300000, guid: 61898c3d7a032d24e87b00cff29463a8, type: 3}
@@ -286,3 +288,48 @@ MonoBehaviour:
   framesPerSecond: 6
   hitFrame: {fileID: 21300000, guid: 64b64e1a63b1aaf45a82a10e7ec6471f, type: 3}
   hitTime: 0.3
+--- !u!114 &2524317472318197375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7180510930262961744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 870a727c1727e1f40b1087f3f5494cce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoRegRats.RatFighter
+  noticeRange: 4
+  noticeHeight: 1.3
+  approachSpeed: 2
+  reach: 1.6
+  strikeHeight: 1.4
+  damage: 2
+  windUpTime: 0.45
+  secondWindUpTime: 0.2
+  strikeTime: 0.2
+  recoverTime: 0.4
+  lungeSpeed: 5.5
+  lungeTime: 0.25
+  restTime: {x: 0.8, y: 1.5}
+  moves:
+  - move: 0
+    weight: 3
+  - move: 1
+    weight: 2
+  - move: 2
+    weight: 2
+  - move: 3
+    weight: 1.5
+  ratAnimator: {fileID: 6152074394634156406}
+  windUpFrames:
+  - {fileID: 21300000, guid: 7d5f5224d0ccded4f8449fa6d900cdb5, type: 3}
+  - {fileID: 21300000, guid: 61898c3d7a032d24e87b00cff29463a8, type: 3}
+  - {fileID: 21300000, guid: a638b38adca43544d893d818b35a13db, type: 3}
+  strikeFrames:
+  - {fileID: 21300000, guid: 6e72b13da7a403f41af15939bd8c0443, type: 3}
+  - {fileID: 21300000, guid: fb4f77fa817d5fc4d9d978c712df9800, type: 3}
+  windUpSquash: {x: 1.1, y: 0.88}
+  warningTint: {r: 1, g: 0.82, b: 0.45, a: 1}
+  flashRate: 9

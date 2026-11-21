@@ -12,7 +12,7 @@ namespace NoRegRats
     {
         // Saved by number in the scenes, so add new sounds at the end. Punch was Shoot.
         // Gunshot is for the shooting rat (Rat2); Push is the scrape while a box or bin is pushed.
-        public enum Sound { Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate, Click, Gunshot, Push }
+        public enum Sound { Jump, Land, Step, Punch, Hit, RatPoof, Hurt, KingThrow, KingDefeated, Heart, Gate, Click, Gunshot, Push, Checkpoint }
 
         [Serializable]
         struct Entry

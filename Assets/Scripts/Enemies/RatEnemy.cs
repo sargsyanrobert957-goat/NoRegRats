@@ -5,8 +5,9 @@ namespace NoRegRats
 {
     /// <summary>
     /// A patrolling rat that turns at walls, ledges and the end of its range. A hit knocks it back and
-    /// stuns it; at 0 HP it shrinks away. ContactDamage does the biting. Rat types are prefab
-    /// variations of Health, damage and speed.
+    /// stuns it; at 0 HP it shrinks away. ContactDamage does the biting, and a RatFighter (if there is
+    /// one) takes over to attack the hero when they come near. Rat types are prefab variations of
+    /// Health, damage, speed and attacks.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
     public class RatEnemy : MonoBehaviour
@@ -44,6 +45,7 @@ namespace NoRegRats
         readonly RaycastHit2D[] hits = new RaycastHit2D[4];
         Vector3 visualPosition;
         Vector3 visualScale;
+        RatFighter fighter;
         Vector2 home;
         int direction;
         // Where it last turned at a wall or ledge, and which side that was on (0 = not yet).
@@ -58,6 +60,7 @@ namespace NoRegRats
             bodyCollider = GetComponent<Collider2D>();
             health = GetComponent<Health>();
             spriteRenderer = visual.GetComponent<SpriteRenderer>();
+            fighter = GetComponent<RatFighter>();
             visualPosition = visual.localPosition;
             visualScale = visual.localScale;
             home = body.position;
@@ -97,7 +100,12 @@ namespace NoRegRats
             }
             else
             {
-                velocity.x = Patrol() ? direction * walkSpeed : 0f;
+                // A RatFighter takes over the walking while it fights the hero.
+                float fightVelocity = 0f;
+                if (fighter != null && fighter.Steer(ref fightVelocity, ref direction))
+                    velocity.x = fightVelocity;
+                else
+                    velocity.x = Patrol() ? direction * walkSpeed : 0f;
             }
             body.linearVelocity = velocity;
         }
@@ -136,16 +144,17 @@ namespace NoRegRats
                 return;
 
             // Waddle only while walking; settle back to upright when stopped.
-            bool walking = Mathf.Abs(body.linearVelocity.x) > 0.1f;
+            bool walking = Mathf.Abs(body.linearVelocity.x) > 0.1f && (fighter == null || !fighter.Attacking);
             waddlePhase = walking ? waddlePhase + Time.deltaTime * waddleSpeed : 0f;
             float step = Mathf.Sin(waddlePhase);
             visual.localPosition = visualPosition + Vector3.up * (Mathf.Abs(step) * waddleBob);
             visual.localRotation = Quaternion.Euler(0f, 0f, step * waddleTilt);
-            visual.localScale = new Vector3(Mathf.Abs(visualScale.x) * direction, visualScale.y, visualScale.z);
+            Vector2 pose = fighter != null ? fighter.Pose : Vector2.one;
+            visual.localScale = new Vector3(Mathf.Abs(visualScale.x) * direction * pose.x, visualScale.y * pose.y, visualScale.z);
         }
 
         // A wall, crate or other rat right ahead in that direction (the hero doesn't count), or a ledge.
-        bool Blocked(int towards)
+        public bool Blocked(int towards)
         {
             int count = body.Cast(new Vector2(towards, 0f), solidFilter, hits, 0.05f);
             for (int i = 0; i < count; i++)
