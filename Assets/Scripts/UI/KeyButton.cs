@@ -13,7 +13,10 @@ namespace NoRegRats
     public class KeyButton : MonoBehaviour, IPointerClickHandler, ISubmitHandler
     {
         [SerializeField] KeyBindings.Control control;
+        [Tooltip("Plain-font key name: used if there is no drawn label, and by it for what it can't draw.")]
         [SerializeField] Text label;
+        [Tooltip("The key name in the hand-drawn capitals.")]
+        [SerializeField] DrawnText drawnLabel;
         [Tooltip("Narrowest the box gets, in canvas units.")]
         [SerializeField] float minWidth = 100f;
         [Tooltip("Room left and right of the key's name, in canvas units, both sides together.")]
@@ -66,8 +69,19 @@ namespace NoRegRats
 
         void Refresh()
         {
-            label.text = KeyBindings.Rebinding == control ? waitingText : KeyBindings.KeyName(control);
-            rect.sizeDelta = new Vector2(Mathf.Max(minWidth, label.preferredWidth + padding), rect.sizeDelta.y);
+            string name = KeyBindings.Rebinding == control ? waitingText : KeyBindings.KeyName(control);
+            float width;
+            if (drawnLabel != null)
+            {
+                drawnLabel.SetText(name);
+                width = drawnLabel.Width;
+            }
+            else
+            {
+                label.text = name;
+                width = label.preferredWidth;
+            }
+            rect.sizeDelta = new Vector2(Mathf.Max(minWidth, width + padding), rect.sizeDelta.y);
         }
 
         void LateUpdate()

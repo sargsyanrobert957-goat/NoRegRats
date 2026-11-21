@@ -34,7 +34,6 @@ namespace NoRegRats
         const float WindowScale = 0.6f;
         const float PauseWindowScale = 0.55f;
         const float PauseWindowGap = 40f;
-        const float ControlsHintScale = 0.28f;
 
         // The controls window, in pixels on the window drawing: one row per control, its key box(es)
         // ending at KeyRight, then the drawn arrow and word (cut from the artist's controls sheet,
@@ -90,7 +89,7 @@ namespace NoRegRats
             HeartsOnly(hud);
             BuildLivesScreen(hud);
             BuildPauseButton(hud);
-            BuildControlsHint(hud);
+            RemoveControlsHint(hud);
             BuildKeyControls(hud);
             AddClickSound();
 
@@ -214,27 +213,20 @@ namespace NoRegRats
         }
 
         /// <summary>
-        /// The controls sheet in a small window in the bottom-left corner, shown when play first
-        /// starts and faded out by ControlsHint once the keys have been used.
+        /// The controls card that used to sit in the bottom-left corner at the start; the controls
+        /// are painted on the start wall now (StartWallSetup).
         /// </summary>
-        internal static void BuildControlsHint(Transform hud)
+        internal static void RemoveControlsHint(Transform hud)
         {
-            if (hud.Find("Controls Hint") != null)
-                return;
-            Vector2 size = Window * ControlsHintScale;
-            RectTransform card = Rect("Controls Hint", hud, Vector2.zero, new Vector2(30f, 30f) + size * 0.5f, size, new Vector2(0.5f, 0.5f));
-            card.gameObject.AddComponent<CanvasGroup>();
-            Picture(Rect("Back", card, new Vector2(0.5f, 0.5f), Vector2.zero, size, new Vector2(0.5f, 0.5f)), Art("Window"));
-            ControlsRows(card, ControlsHintScale, interactive: false);
-            card.gameObject.AddComponent<ControlsHint>();
-            // With the HUD, under the menus.
-            card.SetSiblingIndex(hud.Find("Hearts").GetSiblingIndex() + 1);
+            Transform hint = hud.Find("Controls Hint");
+            if (hint != null)
+                Object.DestroyImmediate(hint.gameObject);
         }
 
         /// <summary>
         /// Changeable keys: the title's Controls button and Controls screen, and the key boxes in
-        /// the pause screen's controls window and the hint card, in place of the old fixed picture
-        /// of the controls. Each part is only added if it isn't there yet.
+        /// the pause screen's controls window, in place of the old fixed picture of the controls.
+        /// Each part is only added if it isn't there yet.
         /// </summary>
         internal static void BuildKeyControls(Transform hud)
         {
@@ -242,25 +234,45 @@ namespace NoRegRats
             Transform title = hud.Find("Title Menu");
             if (title != null && title.Find("Board/Controls") == null)
                 AddTitleControls(hud, title);
-            foreach (string path in new[] { "Pause Menu/Controls", "Controls Hint" })
+            Transform window = hud.Find("Pause Menu/Controls");
+            Transform oldPicture = window != null ? window.Find("Keys") : null;
+            if (oldPicture != null && oldPicture.TryGetComponent(out Image _))
             {
-                Transform window = hud.Find(path);
-                Transform oldPicture = window != null ? window.Find("Keys") : null;
-                if (oldPicture == null || !oldPicture.TryGetComponent(out Image _))
-                    continue;
                 Object.DestroyImmediate(oldPicture.gameObject);
-                bool pause = path.StartsWith("Pause");
-                ControlsRows((RectTransform)window, pause ? PauseWindowScale : ControlsHintScale, interactive: pause);
+                ControlsRows((RectTransform)window, PauseWindowScale);
             }
-            // The hint card was drawn at a smaller size before the keys became text.
-            var hint = (RectTransform)hud.Find("Controls Hint");
-            Vector2 hintSize = Window * ControlsHintScale;
-            if (hint != null && hint.sizeDelta != hintSize)
+            UseDrawnKeyNames(hud);
+        }
+
+        /// <summary>
+        /// Key names in the hand-drawn capitals (DrawnText) on every key box that doesn't have them
+        /// yet; the plain-font label stays as the fallback for characters the alphabet lacks.
+        /// </summary>
+        internal static void UseDrawnKeyNames(Transform hud)
+        {
+            DrawnAlphabet alphabet = AlphabetSetup.Get();
+            foreach (KeyButton key in hud.GetComponentsInChildren<KeyButton>(true))
             {
-                hint.sizeDelta = hintSize;
-                hint.anchoredPosition = new Vector2(30f, 30f) + hintSize * 0.5f;
-                ((RectTransform)hint.Find("Back")).sizeDelta = hintSize;
+                var so = new SerializedObject(key);
+                if (so.FindProperty("drawnLabel").objectReferenceValue != null)
+                    continue;
+                var label = (Text)so.FindProperty("label").objectReferenceValue;
+                so.FindProperty("drawnLabel").objectReferenceValue = AddDrawnLabel(label, alphabet, ((RectTransform)key.transform).sizeDelta.y);
+                so.ApplyModifiedPropertiesWithoutUndo();
             }
+        }
+
+        static DrawnText AddDrawnLabel(Text label, DrawnAlphabet alphabet, float boxHeight)
+        {
+            var drawn = label.gameObject.AddComponent<DrawnText>();
+            var so = new SerializedObject(drawn);
+            so.FindProperty("alphabet").objectReferenceValue = alphabet;
+            so.FindProperty("capHeight").floatValue = boxHeight * 0.4f;
+            so.FindProperty("color").colorValue = Ink;
+            so.FindProperty("alignment").enumValueIndex = (int)DrawnText.Align.Centre;
+            so.FindProperty("fallback").objectReferenceValue = label;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return drawn;
         }
 
         // The title's buttons move to make room for Controls (between Continue and Exit, zig-zagging
@@ -279,7 +291,7 @@ namespace NoRegRats
             float s = WindowScale;
             RectTransform window = Board("Window", screen.transform, Window * s, new Vector2(0f, 80f));
             Piece("Back", window, Art("Window"), Vector2.zero, s);
-            ControlsRows(window, s, interactive: true);
+            ControlsRows(window, s);
             Sprite returnArt = Art("Controls/Return");
             RectTransform back = Rect("Return", screen.transform, new Vector2(0.5f, 0.5f), new Vector2(0f, -448f), returnArt.rect.size * 0.3f, new Vector2(0.5f, 0.5f));
             Button returnButton = MakeButton(Picture(back, returnArt), Navigation.Mode.Automatic);
@@ -297,18 +309,17 @@ namespace NoRegRats
         }
 
         /// <summary>
-        /// The rows of the controls window, at scale s of the window drawing: key boxes, arrow and
-        /// word. Interactive ones are buttons that wait for a new key, with the "press a key" line
-        /// and Reset under them; the hint card's only show the keys, centred in the card.
+        /// The rows of the controls window, at scale s of the window drawing: key boxes (buttons that
+        /// wait for a new key), arrow and word, with the "press a key" line and Reset under them.
         /// </summary>
-        static RectTransform ControlsRows(RectTransform window, float s, bool interactive)
+        static RectTransform ControlsRows(RectTransform window, float s)
         {
             RectTransform sheet = Rect("Keys", window, new Vector2(0.5f, 0.5f), Vector2.zero, Window * s, new Vector2(0.5f, 0.5f));
             Sprite keyArt = KeyArt();
             Sprite arrowArt = Art("Controls/Arrow");
+            DrawnAlphabet alphabet = AlphabetSetup.Get();
             float referencePixelsPerUnit = window.GetComponentInParent<CanvasScaler>().referencePixelsPerUnit;
-            // Without Reset and the prompt the rows are centred in the window.
-            float top = interactive ? RowTop : (Window.y - RowStep * (ControlRows.Length - 1)) * 0.5f;
+            float top = RowTop;
 
             for (int row = 0; row < ControlRows.Length; row++)
             {
@@ -317,7 +328,7 @@ namespace NoRegRats
                 RectTransform rightBox = null;
                 for (int i = keys.Length - 1; i >= 0; i--)
                 {
-                    RectTransform box = KeyBox(sheet, keys[i], keyArt, new Vector2(KeyRight, y), s, referencePixelsPerUnit, interactive);
+                    RectTransform box = KeyBox(sheet, keys[i], keyArt, new Vector2(KeyRight, y), s, referencePixelsPerUnit, alphabet);
                     if (rightBox != null)
                     {
                         var serialized = new SerializedObject(box.GetComponent<KeyButton>());
@@ -335,11 +346,6 @@ namespace NoRegRats
                 AtCentre(word, sheet, wordArt, new Vector2(ArrowLeft + arrowSize.x + WordGap + wordSize.x * 0.5f, y - wordSize.y * 0.05f), WordScale, s);
             }
 
-            if (!interactive)
-            {
-                sheet.gameObject.AddComponent<ControlsSheet>();
-                return sheet;
-            }
             Text prompt = Label("Prompt", sheet, "", Mathf.RoundToInt(46f * s), Ink, TextAnchor.MiddleCenter);
             prompt.fontStyle = FontStyle.Bold;
             Place(prompt.rectTransform, new Vector2(0f, 1f), new Vector2(Window.x * 0.5f * s, -PromptY * s), new Vector2(Window.x * s, 70f * s), new Vector2(0.5f, 0.5f));
@@ -352,8 +358,9 @@ namespace NoRegRats
             return sheet;
         }
 
-        // A key box: the drawn START frame stretched to fit the key's name, right edge at rightMiddle.
-        static RectTransform KeyBox(RectTransform sheet, KeyBindings.Control control, Sprite art, Vector2 rightMiddle, float s, float referencePixelsPerUnit, bool interactive)
+        // A key box: the drawn START frame stretched to fit the key's name (in the drawn capitals),
+        // right edge at rightMiddle.
+        static RectTransform KeyBox(RectTransform sheet, KeyBindings.Control control, Sprite art, Vector2 rightMiddle, float s, float referencePixelsPerUnit, DrawnAlphabet alphabet)
         {
             float height = KeyHeight * s;
             RectTransform box = Rect(control.ToString(), sheet, new Vector2(0f, 1f), new Vector2(rightMiddle.x * s, -rightMiddle.y * s), new Vector2(height * 1.25f, height), new Vector2(1f, 0.5f));
@@ -377,11 +384,11 @@ namespace NoRegRats
             var serialized = new SerializedObject(key);
             serialized.FindProperty("control").intValue = (int)control;
             serialized.FindProperty("label").objectReferenceValue = label;
+            serialized.FindProperty("drawnLabel").objectReferenceValue = AddDrawnLabel(label, alphabet, height);
             serialized.FindProperty("minWidth").floatValue = height * 1.25f;
             serialized.FindProperty("padding").floatValue = height * 0.75f;
             serialized.ApplyModifiedPropertiesWithoutUndo();
-            if (interactive)
-                MakeButton(image, Navigation.Mode.Automatic);
+            MakeButton(image, Navigation.Mode.Automatic);
             return box;
         }
 
@@ -441,7 +448,7 @@ namespace NoRegRats
 
             RectTransform controls = Board("Controls", panel.transform, Window * s, new Vector2(offset, 0f));
             Piece("Back", controls, Art("Window"), Vector2.zero, s);
-            ControlsRows(controls, s, interactive: true);
+            ControlsRows(controls, s);
 
             var menu = Get<PauseMenu>(hud);
             SetObject(menu, "panel", panel);

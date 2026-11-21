@@ -19,8 +19,9 @@ namespace NoRegRats
         const string TickArt = "Assets/Art/Level/CheckpointTick.png";
         const string SoundClip = "Assets/Audio/SFX/Heart.ogg";
 
-        // Where the tick sits on the sign: the board's middle, from the sign's feet, in world units.
-        static readonly Vector2 TickSpot = new Vector2(0f, 1.32f);
+        // Where the tick sits on the sign (its pivot is its bottom): centred in the board's frame.
+        // In the sign's units, from its feet.
+        static readonly Vector2 TickSpot = new Vector2(0f, 1.293f);
 
         // Index, where the sign stands (on the floor), and the goal shown on respawning there.
         static readonly (Vector2 spot, string goal)[] Spots =
@@ -43,7 +44,7 @@ namespace NoRegRats
             KeepFullSize(SignArt);
             KeepFullSize(TickArt);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) ?? MakePrefab();
-            FixSorting(prefab);
+            FixPrefab(prefab);
 
             var scene = EditorSceneManager.OpenScene(ScenePath);
             Transform level = GameObject.Find("Level").transform;
@@ -111,15 +112,18 @@ namespace NoRegRats
             importer.SaveAndReimport();
         }
 
-        // Signs made before the sorting was settled sat behind the station's walls.
-        static void FixSorting(GameObject prefab)
+        // Keeps a sign made earlier up to date: the sorting (they once sat behind the station's
+        // walls), the size, and the tick's place on the redrawn board.
+        static void FixPrefab(GameObject prefab)
         {
             var sign = prefab.GetComponent<SpriteRenderer>();
             var tick = prefab.transform.Find("Tick").GetComponent<SpriteRenderer>();
-            if (sign.sortingOrder == SignOrder && tick.sortingOrder == SignOrder + 1 && prefab.transform.localScale.x == SignScale)
+            if (sign.sortingOrder == SignOrder && tick.sortingOrder == SignOrder + 1 && prefab.transform.localScale.x == SignScale
+                && (Vector2)tick.transform.localPosition == TickSpot)
                 return;
             GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
             root.transform.localScale = Vector3.one * SignScale;
+            root.transform.Find("Tick").localPosition = TickSpot;
             root.GetComponent<SpriteRenderer>().sortingOrder = SignOrder;
             root.transform.Find("Tick").GetComponent<SpriteRenderer>().sortingOrder = SignOrder + 1;
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);

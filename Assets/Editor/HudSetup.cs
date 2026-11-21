@@ -54,7 +54,6 @@ namespace NoRegRats
             MenuSetup.HeartsOnly(hud);
             MenuSetup.BuildLivesScreen(hud);
             MenuSetup.BuildPauseButton(hud);
-            MenuSetup.BuildControlsHint(hud);
             MenuSetup.BuildKeyControls(hud);
             BuildEventSystem();
             BuildLevelTriggers(goal, speech);
